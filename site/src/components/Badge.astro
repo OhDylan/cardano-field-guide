@@ -1,0 +1,16 @@
+---
+// Status chip. Colour never carries meaning alone: the label text is always shown.
+interface Props { kind: "live" | "coming" | "gap" | "unverified" | "open" | "closed" | "rolling" | "failed" | "paused"; label?: string }
+const { kind, label } = Astro.props;
+const defaults = { live: "Live", coming: "Coming", gap: "Gap", unverified: "Unverified", open: "Open", closed: "Closed", rolling: "Rolling", failed: "Failed", paused: "Paused" };
+const tone = { live: "live", open: "live", coming: "coming", rolling: "coming", gap: "gap", failed: "gap", closed: "unverified", paused: "gap", unverified: "unverified" }[kind];
+const icon = { live: "●", open: "●", coming: "◐", rolling: "↻", gap: "○", failed: "✕", closed: "■", paused: "‖", unverified: "?" }[kind];
+---
+<span class={`badge ${tone}`}><span aria-hidden="true">{icon}</span>{label ?? defaults[kind]}</span>
+<style>
+  .badge { display: inline-flex; align-items: center; gap: .3em; font-family: var(--font-mono); font-size: .7rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; padding: .15em .55em; border-radius: 999px; white-space: nowrap; vertical-align: .12em; line-height: 1.5; }
+  .live { color: var(--live); background: var(--live-bg); }
+  .coming { color: var(--coming); background: var(--coming-bg); }
+  .gap { color: var(--gap); background: var(--gap-bg); }
+  .unverified { color: var(--unverified); background: var(--unverified-bg); }
+</style>

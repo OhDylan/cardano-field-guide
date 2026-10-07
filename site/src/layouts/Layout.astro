@@ -1,0 +1,95 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  lastVerified?: string;
+}
+const { title, description = "An honest, technical field guide to building on Cardano.", lastVerified = "2026-10-07" } = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { href: "/state", label: "State of Cardano" },
+  { href: "/mental-model", label: "Mental model" },
+  { href: "/stack", label: "The stack" },
+  { href: "/frontiers/defi", label: "Frontiers" },
+  { href: "/funding", label: "Get funded" },
+  { href: "/gaps", label: "Gaps" },
+  { href: "/ecosystem", label: "Who's who" },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Cardano Field Guide</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script is:inline>
+      try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container bar">
+        <a class="brand" href="/"><span class="mark" aria-hidden="true">◇</span> Cardano Field Guide</a>
+        <details class="menu">
+          <summary aria-label="Menu">Menu</summary>
+          <nav>
+            {nav.map((n) => (
+              <a href={n.href} aria-current={path.startsWith(n.href.split("/").slice(0, 2).join("/")) ? "page" : undefined}>{n.label}</a>
+            ))}
+          </nav>
+        </details>
+        <button class="theme" type="button" aria-label="Toggle colour theme" id="theme-toggle">◐</button>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>Independent community project by an ADA holder. Not affiliated with Input Output, the Cardano Foundation, EMURGO or Intersect.</p>
+        <p class="stamp">Facts last verified {lastVerified}. Every page lists its sources; anything unconfirmed is marked UNVERIFIED.</p>
+      </div>
+    </footer>
+    <script is:inline>
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+        root.dataset.theme = dark ? "light" : "dark";
+        try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
+      });
+    </script>
+    <style>
+      .site-header { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+      .bar { display: flex; align-items: center; gap: 1rem; min-height: 60px; }
+      .brand { font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; white-space: nowrap; }
+      .mark { color: var(--accent); }
+      .menu { margin-left: auto; position: relative; }
+      .menu summary { list-style: none; cursor: pointer; font-size: 0.92rem; padding: 0.35rem 0.7rem; border: 1px solid var(--line-strong); border-radius: 8px; }
+      .menu summary::-webkit-details-marker { display: none; }
+      .menu nav { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.5rem; display: grid; min-width: 210px; }
+      .menu nav a { color: var(--ink-2); text-decoration: none; padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.94rem; }
+      .menu nav a:hover, .menu nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+      .theme { background: none; border: 1px solid var(--line-strong); color: var(--ink); border-radius: 8px; padding: 0.3rem 0.55rem; cursor: pointer; font-size: 1rem; }
+      @media (min-width: 1000px) {
+        .menu { margin-left: auto; }
+        .menu summary { display: none; }
+        .menu nav { position: static; display: flex; gap: 0.15rem; background: none; border: 0; padding: 0; min-width: 0; }
+        .menu nav a { font-size: 0.9rem; padding: 0.35rem 0.55rem; }
+      }
+      .site-footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: 0.88rem; }
+      .site-footer p { margin: 0 0 0.4rem; max-width: 46rem; }
+    </style>
+    <script is:inline>
+      // keep the desktop nav visible: details must be open at wide widths
+      const m = document.querySelector(".menu"); const mq = matchMedia("(min-width: 1000px)");
+      const sync = () => { if (mq.matches) m.setAttribute("open", ""); else m.removeAttribute("open"); };
+      sync(); mq.addEventListener("change", sync);
+    </script>
+  </body>
+</html>

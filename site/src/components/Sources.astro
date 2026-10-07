@@ -1,0 +1,16 @@
+---
+interface Props { items: { label: string; url: string }[] }
+const { items } = Astro.props;
+---
+<details class="sources">
+  <summary>Sources ({items.length})</summary>
+  <ol>
+    {items.map((s) => <li><a href={s.url} rel="noopener" target="_blank">{s.label}</a></li>)}
+  </ol>
+</details>
+<style>
+  .sources { margin: 3rem 0 0; border-top: 1px solid var(--line); padding-top: 1rem; font-size: .86rem; color: var(--ink-2); }
+  summary { cursor: pointer; font-family: var(--font-mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  ol { margin-top: .8rem; padding-left: 1.4rem; }
+  li { overflow-wrap: anywhere; }
+</style>

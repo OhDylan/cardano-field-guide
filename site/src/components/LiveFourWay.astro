@@ -1,0 +1,18 @@
+---
+// The standard Live / Coming / Gaps / Try it block used on every Frontier page.
+// Pass four slots: live, coming, gaps, try.
+---
+<div class="four grid grid-2">
+  <section class="card"><h3><span class="dot live" aria-hidden="true"></span>Live today</h3><slot name="live" /></section>
+  <section class="card"><h3><span class="dot coming" aria-hidden="true"></span>Coming</h3><slot name="coming" /></section>
+  <section class="card"><h3><span class="dot gap" aria-hidden="true"></span>Gaps (your opportunity)</h3><slot name="gaps" /></section>
+  <section class="card"><h3><span class="dot try" aria-hidden="true"></span>Try it this week</h3><slot name="try" /></section>
+</div>
+<style>
+  .four { margin: 1.5rem 0 2rem; }
+  .four h3 { font-size: 1rem; display: flex; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+  .four :global(ul) { padding-left: 1.1rem; font-size: .93rem; margin: 0; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot.live { background: var(--live); } .dot.coming { background: var(--coming); }
+  .dot.gap { background: var(--gap); } .dot.try { background: var(--accent); }
+</style>

@@ -1,0 +1,385 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Callout from "../components/Callout.astro";
+import Badge from "../components/Badge.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+
+const sources = [
+  { label: "Koios mainnet API: protocol parameters and tip (queried 2026-10-07)", url: "https://api.koios.rest/api/v1/cli_protocol_params" },
+  { label: "CIP-31 Reference inputs", url: "https://cips.cardano.org/cip/CIP-0031" },
+  { label: "CIP-32 Inline datums", url: "https://cips.cardano.org/cip/CIP-0032" },
+  { label: "CIP-33 Reference scripts", url: "https://cips.cardano.org/cip/CIP-0033" },
+  { label: "IOG: Unlocking more opportunities with Plutus V3", url: "https://www.iog.io/news/unlocking-more-opportunities-with-plutus-v3" },
+  { label: "SundaeSwap: scalability and concurrency (scoopers)", url: "https://sundae.fi/posts/sundaeswap-scalability" },
+  { label: "Minswap batcher docs", url: "https://docs.minswap.org/courses/how-to-perform-swaps/batcher" },
+  { label: "IOG: Architecting dApps on the eUTxO ledger", url: "https://www.iog.io/news/architecting-dapps-on-the-eutxo-ledger" },
+  { label: "Developer Portal: design patterns (stake validator, UTxO indexers)", url: "https://developers.cardano.org/docs/build/smart-contracts/advanced/design-patterns/overview/" },
+  { label: "Anastasia Labs: aiken-design-patterns", url: "https://github.com/Anastasia-Labs/aiken-design-patterns" },
+  { label: "CIP-118 Nested transactions", url: "https://cips.cardano.org/cip/CIP-0118" },
+  { label: "CIP-113 programmable tokens (Cardano Foundation, Feb 2026 update)", url: "https://cardanofoundation.org/blog/february-2026-activities" },
+  { label: "Cardano for Ethereum Developers (official portal)", url: "https://developers.cardano.org/docs/developers/cardano-for-ethereum-developers/" },
+  { label: "Cardano Foundation 2025 developer survey (what devs value: determinism, native assets)", url: "https://cardano-foundation.github.io/state-of-the-developer-ecosystem/2025/" },
+];
+---
+<Layout title="The mental model" description="eUTxO for engineers coming from Ethereum, Solana or web2: what a validator is, why fees are deterministic, and how concurrency really works.">
+  <PageHeader
+    eyebrow="02 · The mental model"
+    title="Cardano checks transactions. It doesn't run them."
+    lede="The one idea that makes everything else click. Once you have it, eUTxO stops looking weird and starts looking like a very strict, very predictable database."
+  />
+
+  <div class="prose">
+    <p class="oneliner"><em>Ethereum runs your code to find out what happens. Cardano asks your code whether what you say happens is allowed.</em></p>
+
+    <p>
+      On Ethereum, a contract is code that executes on-chain and mutates global storage. On Cardano, value and state live in
+      <strong>UTxOs</strong>: immutable outputs, each with an address, a value (ADA plus any tokens) and an optional piece of data called a
+      <strong>datum</strong>. A "smart contract" is a <strong>validator</strong>: a pure function that looks at a proposed transaction and returns
+      <em>yes</em> or <em>no</em>. Your off-chain code computes the new state and builds the transaction. The chain only checks it.
+    </p>
+
+    <h2 id="compare">Account model vs eUTxO, side by side</h2>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>Concept</th><th>Ethereum / EVM</th><th>Solana</th><th>Cardano (eUTxO)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Where state lives</strong></td><td>Contract storage (a global mutable map)</td><td>Accounts owned by programs</td><td><strong>UTxOs</strong>: immutable outputs, each with an address, a value and an optional datum</td></tr>
+        <tr><td><strong>What a contract is</strong></td><td>Code that executes and mutates storage</td><td>A program that mutates the accounts passed in</td><td>A <strong>validator</strong>: <code>(tx, purpose) → ok / fail</code>. It only checks.</td></tr>
+        <tr><td><strong>Who computes new state</strong></td><td>The chain, during execution</td><td>The chain</td><td><strong>Your off-chain code.</strong> The chain verifies it.</td></tr>
+        <tr><td><strong>A "call"</strong></td><td><code>contract.foo(args)</code></td><td>An instruction with accounts</td><td>Spend the script UTxO with a <strong>redeemer</strong> (the argument) and create new outputs (the new state)</td></tr>
+        <tr><td><strong>Composition</strong></td><td>Internal calls</td><td>CPI</td><td>At the transaction level: one tx can spend from, mint with and reference many scripts. Each validator sees the whole tx.</td></tr>
+        <tr><td><strong>Failure</strong></td><td>Revert, but you still pay gas</td><td>Fail, but you pay fees</td><td>Fails during local evaluation, before you submit. A tx whose inputs were already spent is rejected <strong>for free</strong>.</td></tr>
+        <tr><td><strong>Fees</strong></td><td>Gas × dynamic price (an auction)</td><td>Base + priority fees</td><td><code>a × size + b</code> + <code>price × exUnits</code> + reference-script fee. <strong>Known exactly at build time.</strong></td></tr>
+        <tr><td><strong>Tokens</strong></td><td>ERC-20 / 721 contracts</td><td>SPL Token program</td><td><strong>Native assets</strong>: a ledger feature, not a contract</td></tr>
+        <tr><td><strong>"Deploying"</strong></td><td>A deploy tx creates a contract address</td><td>Deploy a program</td><td><strong>No deploy step.</strong> The script address is the hash of the script. Optionally publish it once as a reference script.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="race">See it: two people swap at the same time</h2>
+    <p>
+      This is the scenario that confuses most newcomers, and the one that shows the trade-off most clearly. Two users send a swap against
+      the same liquidity pool in the same block. Press the buttons and watch what each model does.
+    </p>
+  </div>
+
+  <section class="sim card wide" aria-labelledby="sim-title">
+    <div class="sim-head">
+      <h3 id="sim-title">Account model vs eUTxO race</h3>
+      <div class="sim-controls">
+        <button class="btn primary" type="button" id="sim-run">Send both swaps</button>
+        <button class="btn" type="button" id="sim-batch" aria-pressed="false">Batcher mode: off</button>
+        <button class="btn" type="button" id="sim-reset">Reset</button>
+      </div>
+    </div>
+    <p class="small muted sim-note">Pool starts at 1,000 ADA / 1,000 TOKEN (constant product). Alice and Bob each swap 100 ADA. Numbers are illustrative, not live.</p>
+
+    <div class="lanes">
+      <div class="lane" id="lane-acct">
+        <p class="lane-title">Account model <span class="muted">(EVM-style)</span></p>
+        <div class="pool" id="acct-pool">Pool storage<br /><span class="mono" id="acct-pool-val">1,000 ADA · 1,000 TOKEN</span></div>
+        <ol class="steps" id="acct-steps"></ol>
+      </div>
+      <div class="lane" id="lane-utxo">
+        <p class="lane-title">eUTxO <span class="muted">(Cardano)</span></p>
+        <div class="pool" id="utxo-pool">Pool UTxO <span class="mono" id="utxo-ref">#a1</span><br /><span class="mono" id="utxo-pool-val">1,000 ADA · 1,000 TOKEN</span></div>
+        <ol class="steps" id="utxo-steps"></ol>
+      </div>
+    </div>
+    <div class="sim-takeaway" id="sim-takeaway" aria-live="polite"></div>
+  </section>
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p>
+        Concurrency on Cardano is a <strong>design constraint, not a blocker</strong>, but it is a real tax. You can't put a whole AMM in one UTxO and
+        expect many users to hit it per block. The batcher pattern fixes that, and it adds an off-chain operator, fees and some latency.
+        That's roughly where Ethereum ended up anyway with CoW Swap, UniswapX and 1inch Fusion (intents plus solvers). Nested transactions
+        (coming in the Dijkstra era) make the intent pattern native.
+      </p>
+    </Callout>
+
+    <h2 id="anatomy">Anatomy of a spend</h2>
+    <p>Every script interaction has the same parts. Learn these five words and you can read any Cardano contract.</p>
+    <dl class="anatomy">
+      <dt>Datum</dt>
+      <dd>Data attached to a UTxO: the contract's state, e.g. <code>{"{ owner, deadline }"}</code>. Since the Vasil upgrade it can be stored <strong>inline</strong> in the output itself (CIP-32).</dd>
+      <dt>Redeemer</dt>
+      <dd>The argument supplied by whoever spends the UTxO, e.g. <code>Unlock</code> or <code>Cancel</code>. Think "which function, with which args".</dd>
+      <dt>Script context</dt>
+      <dd>The entire transaction (inputs, reference inputs, outputs, mint, signatories, validity interval, withdrawals, certificates, and in Plutus V3 votes and proposals) plus the purpose: spend, mint, withdraw, publish, vote or propose. In Plutus V3 a validator takes a single context argument and the datum and redeemer live inside it.</dd>
+      <dt>Reference inputs &amp; scripts</dt>
+      <dd>Read a UTxO without consuming it (CIP-31): this is how oracles, config and protocol state are read. Put a script in a UTxO once and reference it (CIP-33), so later transactions don't carry the bytes and pay less.</dd>
+      <dt>Validity interval</dt>
+      <dd>Scripts see a time <em>range</em>, not "now". That keeps evaluation deterministic: the same transaction gives the same result on your laptop and on every node.</dd>
+    </dl>
+
+    <h2 id="fees">Determinism and fees</h2>
+    <p>
+      Because a validator only checks a fully specified transaction, you can evaluate it locally and get the <strong>exact</strong> fee and execution
+      budget before you submit. There is no gas auction, and no "someone else changed the state first, so my script failed on-chain".
+      If an input was already spent, your transaction is simply invalid and costs nothing. Collateral is only lost if you knowingly submit a
+      transaction whose script fails.
+    </p>
+  </div>
+
+  <div class="table-wrap prose">
+    <table>
+      <thead><tr><th>Mainnet parameter</th><th>Value</th><th>What it means for you</th></tr></thead>
+      <tbody>
+        <tr><td><code>txFeePerByte</code> / <code>txFeeFixed</code></td><td class="num">44 / 155,381 lovelace</td><td>A simple ~300-byte ADA transfer costs about 0.17 ADA</td></tr>
+        <tr><td><code>executionUnitPrices</code></td><td class="num">mem 0.0577 · steps 0.0000721</td><td>Script cost is priced per unit of memory and CPU (lovelace)</td></tr>
+        <tr><td><code>maxTxExecutionUnits</code></td><td class="num">16.5M mem / 10B steps</td><td>The hard per-transaction script budget (your "gas limit")</td></tr>
+        <tr><td><code>maxTxSize</code></td><td class="num">16,384 bytes</td><td>Why reference scripts matter</td></tr>
+        <tr><td><code>utxoCostPerByte</code></td><td class="num">4,310 lovelace</td><td><strong>Min-ADA</strong>: every output must carry some ADA in proportion to its size. This surprises almost every newcomer.</td></tr>
+        <tr><td><code>collateralPercentage</code></td><td class="num">150%</td><td>Collateral for script transactions, lost only on a script failure you submitted anyway</td></tr>
+        <tr><td><code>protocolVersion</code></td><td class="num">11.0</td><td>van Rossem (July 2026)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="stamp prose">Snapshot from the Koios mainnet API, 2026-10-07 (Conway era, epoch 660). Parameters can change by on-chain governance.</p>
+
+  <div class="prose">
+    <h2 id="native-assets">Native assets: tokens without a contract</h2>
+    <p>
+      A token on Cardano is <code>policyId.assetName</code>. The policy ID is the hash of a <strong>minting policy</strong>: either a native script
+      (multisig and/or time lock, no Plutus at all) or a Plutus validator with the <code>mint</code> purpose. Once minted, tokens ride inside UTxOs
+      next to ADA. Any wallet can send them. There is no <code>transfer</code> function to get wrong, and no <code>approve</code> / <code>transferFrom</code>.
+    </p>
+    <ul>
+      <li><strong>NFTs</strong> use a one-shot policy (it must consume a specific UTxO, so it can only ever run once) or a time-locked policy.</li>
+      <li><strong>Metadata</strong>: CIP-25 (transaction metadata) and CIP-68 (datum-based and updatable via a reference NFT).</li>
+      <li><strong>CIP-113 programmable tokens</strong> (2026) add issuer rules (allow-lists, freezes) for regulated stablecoins and RWAs. It is new; check the current status before you depend on it.</li>
+    </ul>
+
+    <h2 id="concurrency">Concurrency: the standard patterns</h2>
+    <p>
+      A UTxO can only be spent once. If your whole protocol's state is one UTxO, only one transaction per block can touch it. These patterns are
+      how every production protocol deals with that.
+    </p>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>Pattern</th><th>How it works</th><th>Who uses it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Batcher / order UTxO</strong></td><td>Users lock "order" UTxOs at a request script. An off-chain batcher (SundaeSwap calls it a scooper) folds many orders into one transaction against the pool. Validators enforce that each order is filled at a fair price or refunded.</td><td>Minswap, SundaeSwap, most AMMs</td></tr>
+        <tr><td><strong>Order book (orders as UTxOs)</strong></td><td>Every limit order is its own UTxO. Anyone can match it. No shared state, so matching is naturally parallel.</td><td>Genius Yield, Splash, Dano / DeFi Kernel</td></tr>
+        <tr><td><strong>State-thread token</strong></td><td>A unique NFT marks the canonical state UTxO; validators require the NFT to move to the continuing output, so nobody can fake state.</td><td>Most stateful dApps</td></tr>
+        <tr><td><strong>Sharding</strong></td><td>Split state across N UTxOs so N users can act in parallel.</td><td>Lending pools, faucets</td></tr>
+        <tr><td><strong>Withdraw-zero (stake validator)</strong></td><td>Spending validators only check that a staking script ran via a 0-ADA withdrawal, so the heavy logic runs once per transaction, not once per input. A big budget saving for batches.</td><td>Widely used; documented on the dev portal</td></tr>
+        <tr><td><strong>UTxO indexers</strong></td><td>The redeemer carries input→output index mappings so validators skip O(n²) searches.</td><td>Anastasia Labs design patterns</td></tr>
+        <tr><td><strong>Hydra (L2)</strong></td><td>Move high-frequency interaction among known participants off L1 entirely.</td><td>Midnight Glacier Drop, payments</td></tr>
+        <tr><td><strong>Nested transactions</strong> <Badge kind="coming" /></td><td>Partial sub-transactions that a third party completes and batches: native intents and Babel fees (paying fees in non-ADA tokens).</td><td>CIP-118, Dijkstra era</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="rosetta">Rosetta stone: if you know X, here's the Cardano word</h2>
+    <h3>From Solidity / EVM</h3>
+  </div>
+  <div class="table-wrap prose">
+    <table>
+      <thead><tr><th>Solidity / EVM</th><th>Cardano</th></tr></thead>
+      <tbody>
+        <tr><td>ERC-20 / ERC-721</td><td>Native assets plus a minting policy</td></tr>
+        <tr><td>Contract storage, mappings</td><td>Datums on UTxOs; a state-thread token marks the real one</td></tr>
+        <tr><td><code>msg.sender</code></td><td>Required signers: <code>extra_signatories</code> in the script context</td></tr>
+        <tr><td><code>require(...)</code> reverts and burns gas</td><td>Validator returns false → the transaction fails local evaluation and is never submitted</td></tr>
+        <tr><td><code>approve</code> / <code>transferFrom</code></td><td>Not needed: spending authority is per UTxO</td></tr>
+        <tr><td>Proxies / upgradeability</td><td>Parameterized validators, reference scripts, and a config UTxO read as a reference input</td></tr>
+        <tr><td>Events / logs</td><td>Transaction metadata plus an indexer (Oura, Kupo, Dolos)</td></tr>
+        <tr><td>Hardhat / Foundry</td><td><code>aiken check</code> (unit and property tests) plus Yaci DevKit (local chain)</td></tr>
+        <tr><td>One shared pool state</td><td>Batchers, UTxO sharding, and (soon) nested transactions</td></tr>
+        <tr><td>Gas limit</td><td><code>maxTxExecutionUnits</code>, known before you submit</td></tr>
+        <tr><td>Deploying a contract</td><td>Nothing to deploy: send funds to the script hash address</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h3>From Solana / Anchor</h3>
+    <Callout kind="tip">
+      <p>
+        Solana developers have a head start. Anchor already makes you declare every account a transaction touches up front, which is close to how a
+        Cardano transaction lists every input and reference input. The difference: on Cardano those "accounts" are consumed and recreated, never mutated in place.
+      </p>
+    </Callout>
+  </div>
+  <div class="table-wrap prose">
+    <table>
+      <thead><tr><th>Solana / Anchor</th><th>Cardano</th></tr></thead>
+      <tbody>
+        <tr><td>Accounts passed explicitly to an instruction</td><td>Inputs and reference inputs listed explicitly in the transaction</td></tr>
+        <tr><td>Program-owned account data</td><td>A UTxO at a script address carrying a datum</td></tr>
+        <tr><td>Mutating account data</td><td>Consume the UTxO and create a new one with the updated datum</td></tr>
+        <tr><td>PDA (program-derived address)</td><td>Script address, or a parameterized script; a unique NFT marks "the" state UTxO</td></tr>
+        <tr><td>SPL Token / Token-2022</td><td>Native assets; CIP-113 programmable tokens for transfer rules</td></tr>
+        <tr><td>Signer constraint (<code>#[account(signer)]</code>)</td><td>Required signers checked in the validator</td></tr>
+        <tr><td>Instruction data</td><td>Redeemer</td></tr>
+        <tr><td>CPI</td><td>Several scripts validating the same transaction</td></tr>
+        <tr><td>Compute units</td><td>Execution units (memory and CPU steps), priced by protocol parameters</td></tr>
+        <tr><td>Write-lock contention on a hot account</td><td>Contention on a hot UTxO: same fix family (batch, shard, order book)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <Callout kind="tip" title="Where to go next">
+      <p>Ready to write one? The <a href="/stack">stack page</a> has the recommended toolchain and a step-by-step first contract on the Preview testnet. The official portal also has a longer <a href="https://developers.cardano.org/docs/developers/cardano-for-ethereum-developers/" target="_blank" rel="noopener">Cardano for Ethereum Developers</a> guide.</p>
+    </Callout>
+  </div>
+
+  <div class="prose">
+    <Sources items={sources} />
+  </div>
+  <NextPrev prev={{ href: "/state", label: "State of Cardano" }} next={{ href: "/stack", label: "The stack" }} />
+</Layout>
+
+<style>
+  .oneliner { font-size: 1.35rem; line-height: 1.5; border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--ink); }
+  .wide { max-width: var(--wide); }
+  .anatomy dt { font-weight: 600; margin-top: 1rem; font-family: var(--font-mono); font-size: .92rem; color: var(--accent-ink); }
+  .anatomy dd { margin: .2rem 0 0; }
+
+  .sim { margin: 1.5rem 0 2rem; padding: 1.2rem; }
+  .sim-head { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; justify-content: space-between; }
+  .sim-head h3 { margin: 0; font-size: 1.05rem; }
+  .sim-controls { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .sim-note { margin: .6rem 0 1rem; }
+  .lanes { display: grid; gap: 1rem; }
+  @media (min-width: 760px) { .lanes { grid-template-columns: 1fr 1fr; } }
+  .lane { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: .9rem; background: var(--surface-2); min-width: 0; }
+  .lane-title { margin: 0 0 .6rem; font-weight: 600; }
+  .pool { border: 1px dashed var(--line-strong); border-radius: 8px; padding: .55rem .7rem; font-size: .88rem; background: var(--surface); transition: opacity .3s, border-color .3s; }
+  .pool.spent { opacity: .45; text-decoration: line-through; }
+  .pool.fresh { border-color: var(--live); border-style: solid; }
+  .steps { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; gap: .45rem; min-height: 3rem; }
+  .steps :global(li) { margin: 0; font-size: .86rem; line-height: 1.45; border-radius: 8px; padding: .5rem .65rem; background: var(--surface); border: 1px solid var(--line); animation: pop .25s ease-out; }
+  .steps :global(li.ok) { border-left: 3px solid var(--live); }
+  .steps :global(li.bad) { border-left: 3px solid var(--gap); }
+  .steps :global(li.info) { border-left: 3px solid var(--accent); }
+  .steps :global(.tag) { font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); display: block; }
+  .sim-takeaway { margin-top: 1rem; font-size: .95rem; }
+  .sim-takeaway:empty { display: none; }
+  .sim-takeaway { border-top: 1px solid var(--line); padding-top: .9rem; }
+  @keyframes pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .steps :global(li) { animation: none; } }
+</style>
+
+<script>
+  const $ = (id: string) => document.getElementById(id)!;
+  const acctSteps = $("acct-steps");
+  const utxoSteps = $("utxo-steps");
+  const takeaway = $("sim-takeaway");
+  const batchBtn = $("sim-batch");
+  const runBtn = $("sim-run") as HTMLButtonElement;
+  let batch = false;
+  let timers: number[] = [];
+
+  const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+  // constant product: out = y * dx / (x + dx)
+  const swap = (x: number, y: number, dx: number) => {
+    const out = (y * dx) / (x + dx);
+    return { out, x: x + dx, y: y - out };
+  };
+
+  function add(list: HTMLElement, cls: string, tag: string, text: string) {
+    const li = document.createElement("li");
+    li.className = cls;
+    li.innerHTML = `<span class="tag">${tag}</span>${text}`;
+    list.appendChild(li);
+  }
+
+  function reset() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    acctSteps.innerHTML = "";
+    utxoSteps.innerHTML = "";
+    takeaway.textContent = "";
+    $("acct-pool-val").textContent = "1,000 ADA · 1,000 TOKEN";
+    $("utxo-pool-val").textContent = "1,000 ADA · 1,000 TOKEN";
+    $("utxo-ref").textContent = "#a1";
+    $("utxo-pool").classList.remove("spent", "fresh");
+    runBtn.disabled = false;
+  }
+
+  function later(ms: number, fn: () => void) {
+    timers.push(window.setTimeout(fn, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : ms));
+  }
+
+  function runDirect() {
+    // Account model: both execute in order; Bob's slippage guard trips, he reverts and still pays gas.
+    const a1 = swap(1000, 1000, 100);
+    const b1 = swap(a1.x, a1.y, 100);
+    add(acctSteps, "info", "Both txs land in the same block", "Alice and Bob each quoted ~90.9 TOKEN for 100 ADA, with a 2% slippage limit.");
+    later(500, () => {
+      add(acctSteps, "ok", "Alice executes", `Gets ${fmt(a1.out)} TOKEN. Pool storage is mutated.`);
+      $("acct-pool-val").textContent = `${fmt(a1.x)} ADA · ${fmt(a1.y)} TOKEN`;
+    });
+    later(1100, () => {
+      add(acctSteps, "bad", "Bob executes, then reverts", `The pool moved: he'd get only ${fmt(b1.out)} TOKEN, beyond his slippage limit. The tx reverts <strong>on-chain</strong> and he still pays gas.`);
+    });
+
+    // eUTxO: both txs try to spend pool UTxO #a1. First one in wins, second is invalid before any script runs.
+    add(utxoSteps, "info", "Both txs try to spend pool UTxO #a1", "Each was built and evaluated locally first, so each knows its exact fee and output.");
+    later(500, () => {
+      add(utxoSteps, "ok", "Alice's tx is included", `Consumes #a1, creates new pool UTxO #b2. Alice gets ${fmt(a1.out)} TOKEN.`);
+      $("utxo-pool").classList.add("fresh");
+      $("utxo-ref").textContent = "#b2";
+      $("utxo-pool-val").textContent = `${fmt(a1.x)} ADA · ${fmt(a1.y)} TOKEN`;
+    });
+    later(1100, () => {
+      add(utxoSteps, "bad", "Bob's tx is rejected: fee 0 ADA", "Its input #a1 no longer exists. Nodes drop it before running any script. Bob pays nothing, rebuilds against #b2 and resubmits.");
+    });
+    later(1600, () => {
+      takeaway.innerHTML = "<strong>Takeaway.</strong> Both models stop Bob from getting a bad fill. On the account model he learns it on-chain and pays for it. On eUTxO he learns it for free, but only one swap per pool UTxO fits in a block. Turn on <em>Batcher mode</em> to see how real Cardano DEXes get both swaps through.";
+      runBtn.disabled = false;
+    });
+  }
+
+  function runBatch() {
+    const a1 = swap(1000, 1000, 100);
+    const b1 = swap(a1.x, a1.y, 100);
+    add(acctSteps, "info", "Same as before", "On the account model both swaps hit the pool directly; ordering decides who gets which price.");
+    later(500, () => {
+      add(acctSteps, "ok", "Alice executes", `${fmt(a1.out)} TOKEN.`);
+      add(acctSteps, "ok", "Bob executes (wider slippage this time)", `${fmt(b1.out)} TOKEN.`);
+      $("acct-pool-val").textContent = `${fmt(b1.x)} ADA · ${fmt(b1.y)} TOKEN`;
+    });
+
+    add(utxoSteps, "info", "Step 1: users lock orders, not swaps", "Alice and Bob each send 100 ADA to the order script, creating order UTxOs #o1 and #o2 with their minimum-received in the datum. No contention: they touch different UTxOs.");
+    later(700, () => {
+      add(utxoSteps, "info", "Step 2: the batcher builds one tx", "Inputs: pool #a1 + order #o1 + order #o2. The validators check every order gets at least its minimum, or is refunded.");
+    });
+    later(1400, () => {
+      add(utxoSteps, "ok", "Step 3: one tx, both filled", `Alice gets ${fmt(a1.out)} TOKEN, Bob gets ${fmt(b1.out)} TOKEN. Pool #a1 is consumed, #b2 is created.`);
+      $("utxo-pool").classList.add("fresh");
+      $("utxo-ref").textContent = "#b2";
+      $("utxo-pool-val").textContent = `${fmt(b1.x)} ADA · ${fmt(b1.y)} TOKEN`;
+    });
+    later(1900, () => {
+      takeaway.innerHTML = "<strong>Takeaway.</strong> The batcher turns many competing spends into one transaction. This is how Minswap and SundaeSwap work today. The cost: you rely on an off-chain operator (who can't steal, because validators enforce each order, but can be slow or censor), and there is an extra step. Nested transactions in the Dijkstra era make this pattern native.";
+      runBtn.disabled = false;
+    });
+  }
+
+  runBtn.addEventListener("click", () => {
+    reset();
+    runBtn.disabled = true;
+    batch ? runBatch() : runDirect();
+  });
+  $("sim-reset").addEventListener("click", reset);
+  batchBtn.addEventListener("click", () => {
+    batch = !batch;
+    batchBtn.setAttribute("aria-pressed", String(batch));
+    batchBtn.textContent = `Batcher mode: ${batch ? "on" : "off"}`;
+    reset();
+  });
+</script>

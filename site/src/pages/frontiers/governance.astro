@@ -1,0 +1,305 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FrontierTabs from "../../components/FrontierTabs.astro";
+import LiveFourWay from "../../components/LiveFourWay.astro";
+import Badge from "../../components/Badge.astro";
+import Callout from "../../components/Callout.astro";
+import Stat from "../../components/Stat.astro";
+import Sources from "../../components/Sources.astro";
+import NextPrev from "../../components/NextPrev.astro";
+
+const timeline = [
+  { date: "Sep 2024", what: "Chang hard fork: CIP-1694 governance goes live with an interim constitution and an Interim Constitutional Committee." },
+  { date: "Jan 2025", what: "Plomin hard fork (protocol v10): DReps get full voting power, including treasury withdrawals." },
+  { date: "23 Feb 2025", what: "The first Cardano Constitution takes effect, ratified with about 85% DRep approval." },
+  { date: "Jul–Aug 2025", what: "First on-chain budget: 39 Intersect-administered withdrawals, about ₳264M approved. Treasury money flows into audited smart contracts for the first time." },
+  { date: "Dec 2025", what: "₳70M Critical Integrations budget enacted (USDCx, Pyth, Dune, LayerZero, custody)." },
+  { date: "Jan 2026", what: "Constitution v2.4 enacted. Every withdrawal must now carry its own full justification." },
+  { date: "Feb–Mar 2026", what: "Project Catalyst paused; stewardship moves from IOG to the Cardano Foundation (info action, 83% yes)." },
+  { date: "May 2026", what: "Cardano Summit 2026 funding fails at 65.06% against a 67% bar. The summit is cancelled." },
+  { date: "18 Jul 2026", what: "van Rossem hard fork (protocol v11): the first hard fork proposed, debated and ratified entirely on-chain." },
+  { date: "Jul 2026", what: "DReps raise the Net Change Limit to ₳500M for Feb 2026 – Jul 2027." },
+  { date: "17 Aug 2026", what: "₳120M Cardano PRIME DeFi program enacted (about 73% yes)." },
+];
+
+const sources = [
+  { label: "Koios API (totals, epoch_params, proposal_list, proposal_voting_summary), queried 2026-10-07", url: "https://api.koios.rest/api/v1/totals" },
+  { label: "Cardano Constitution", url: "https://cardano.org/constitution/" },
+  { label: "IOG — From convention to ratification: the Cardano Constitution", url: "https://www.iog.io/news/from-convention-to-ratification-the-cardano-constitution" },
+  { label: "Intersect — updated Constitution ratification outcome", url: "https://intersectmbo.org/news/updated-cardano-constitution-ratification-outcome-and-effective-date" },
+  { label: "Bitcoinist — 39 proposals under the 2025 budget framework", url: "https://bitcoinist.com/cardano-39-proposals-under-new-budget-framework/" },
+  { label: "Intersect — Critical Integrations progress update", url: "https://intersectmbo.org/news/critical-integrations-technical-progress-update-and-pentad-v2" },
+  { label: "The Block — Cardano Summit 2026 cancelled after vote", url: "https://www.theblock.co/amp/post/403122/cardano-foundation-cancels-2026-summit-after-treasury-funding-vote-falls-just-short" },
+  { label: "Yahoo Finance — DReps vote on Pogun", url: "https://finance.yahoo.com/markets/crypto/articles/cardano-news-dreps-pogun-vote-091000617.html" },
+  { label: "Cexplorer — Orion Fund approved", url: "https://cexplorer.io/article/cardano-community-approves-50m-ada-for-the-draper-dragon-orion-fund" },
+  { label: "CardanoCube — Cardano PRIME governance action", url: "https://www.cardanocube.com/governance/gov_actions/gov_action122wue2k65qq8gmpz795z2axt8apka6ay6xt3pwg8jxj5yfkujmtsqvlfpu7" },
+  { label: "SundaeSwap treasury-contracts (README)", url: "https://github.com/SundaeSwap-finance/treasury-contracts" },
+  { label: "cardano.org — smart contract tooling for the treasury", url: "https://cardano.org/news/2025-07-18-smart-contract-tooling/" },
+  { label: "Intersect — 2026 Constitutional Committee elections", url: "https://intersectmbo.org/news/the-2026-constitutional-committee-elections" },
+  { label: "Essential Cardano — governance tools you should know", url: "https://www.essentialcardano.io/article/navigating-cardano-governance-essential-tools-you-should-know" },
+  { label: "Cardano Foundation — budget review process 2026", url: "https://cardanofoundation.org/blog/cardano-foundation-budget-review-process-2026" },
+  { label: "Intersect — 2026 budget process timeline", url: "https://docs.intersectmbo.org/intersect-knowledge-base/cardano-facilitation-services/cardano-budget-2026/2026-budget-process-timeline" },
+  { label: "CoinDesk — van Rossem hard fork", url: "https://www.coindesk.com/markets/2026/07/20/inside-cardano-s-van-rossum-hard-fork-and-what-it-means-for-users" },
+];
+---
+<Layout title="Governance & treasury" description="Cardano's on-chain governance (CIP-1694), its 1.37B ADA treasury, and how builders can propose, vote on and receive treasury funds.">
+  <PageHeader eyebrow="Frontiers · Governance" title="Governance you can program, and a treasury you can ask" lede="Cardano runs its governance on-chain: who can vote, what passes, and where treasury money goes are all protocol rules. For a builder that means two things: a large pool of money you can apply for directly, and a governance layer you can build tools on." />
+  <FrontierTabs />
+
+  <div class="grid grid-3 stats">
+    <Stat label="Treasury balance (epoch 660)" value="₳1,374.6M" sub="≈ $366M at $0.267. Down from ₳1,663.5M in Apr 2026." />
+    <Stat label="Inflow per epoch" value="≈ ₳3.6M" sub="Every 5 days, ≈ ₳265M a year (our estimate from epochs 658→660)." />
+    <Stat label="Spending headroom to Jul 2027" value="≈ ₳43M" sub="Our calculation: ₳500M Net Change Limit minus ≈ ₳457M already enacted." />
+  </div>
+
+  <LiveFourWay>
+    <ul slot="live">
+      <li>All seven governance action types, voted by DReps, SPOs and the Constitutional Committee.</li>
+      <li>Treasury withdrawals into audited Aiken <strong>treasury contracts</strong> with milestone vesting.</li>
+      <li>Script-based DReps and CC members (multisig or Plutus), so a DAO can vote as one.</li>
+      <li>GovTool, 1694.io, Tempo, CardanoCube and Koios/Blockfrost governance APIs.</li>
+    </ul>
+    <ul slot="coming">
+      <li>A new Net Change Limit for after Jul 2027, which decides how much big asks can get. <Badge kind="unverified" label="Date TBD" /></li>
+      <li>The next Intersect annual budget process, probably around Q1–Q2 2027. <Badge kind="unverified" /></li>
+      <li>Multi-asset treasury (CPS-23) work, funded in IO's 2026 "Cardano Upgrades" budget.</li>
+    </ul>
+    <ul slot="gaps">
+      <li>Small, fast grants: nothing like Polkadot's $10k-in-72-hours lane exists.</li>
+      <li>DRep tooling for analysis: proposal diffing, rationale search, vote-history analytics.</li>
+      <li>"Follow the money" dashboards that trace treasury → administrator → vendor milestones.</li>
+    </ul>
+    <ul slot="try">
+      <li>Register a DRep on <strong>SanchoNet</strong> or Preview with GovTool (500 test ADA deposit).</li>
+      <li>Pull live proposals: <code>curl https://api.koios.rest/api/v1/proposal_list</code>.</li>
+      <li>Read the <code>treasury.ak</code> and <code>vendor.ak</code> validators and try <code>@sundaeswap/treasury-funds</code> on a testnet.</li>
+    </ul>
+  </LiveFourWay>
+
+  <div class="prose">
+    <h2 id="timeline">How we got here</h2>
+    <p>Governance went live in stages. The useful thing to know is that it is no longer a plan: hard forks, budgets and the constitution are all being decided on-chain, and some proposals lose.</p>
+  </div>
+  <ol class="timeline prose">
+    {timeline.map((t) => <li><span class="when mono">{t.date}</span><span class="what">{t.what}</span></li>)}
+  </ol>
+
+  <div class="prose">
+    <h2 id="bodies">The three voting bodies</h2>
+    <p>Each governance action is voted on by some combination of three groups. Think of it as a bicameral legislature plus a constitutional court that only checks legality, not merit.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Body</th><th>Who</th><th>What they vote on</th><th>Today (epoch 660)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>DReps</strong><br /><span class="muted small">Delegated Representatives</span></td><td>Anyone, with a refundable 500 ADA deposit. ADA holders delegate voting power to them; delegation is liquid and revocable.</td><td>Every action type except security-group parameters. With the CC, the <em>only</em> voters on treasury withdrawals.</td><td><strong>858</strong> DReps. About 15.8B ADA delegated to DRep options, of which about <strong>10.4B ADA</strong> sits with the built-in "Always Abstain" option (mostly exchanges and custodians). DReps go inactive after 20 epochs without voting.</td></tr>
+        <tr><td><strong>SPOs</strong><br /><span class="muted small">Stake pool operators</span></td><td>About 3,000 pools, weighted by stake. <Badge kind="unverified" label="Count approx." /></td><td>No-confidence, committee changes, hard forks, security-group parameters, info actions.</td><td>51% thresholds where they vote.</td></tr>
+        <tr><td><strong>Constitutional Committee</strong></td><td>Elected members; can be script credentials (e.g. a multisig).</td><td>Whether an action is <em>constitutional</em>. Not whether it is a good idea.</td><td><strong>7</strong> members seated, quorum 2/3. Four seats were replaced in the 2026 election.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="thresholds">Action types and the thresholds they need</h2>
+    <p>These are the live protocol parameters at epoch 660. A proposal needs a refundable <strong>100,000 ADA deposit</strong> and stays open for about <strong>6 epochs (≈ 30 days)</strong>.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Action</th><th class="num">DRep</th><th class="num">SPO</th><th>CC needed?</th></tr></thead>
+      <tbody>
+        <tr><td>Motion of no-confidence</td><td class="num">67%</td><td class="num">51%</td><td>No</td></tr>
+        <tr><td>Update committee (normal state)</td><td class="num">67%</td><td class="num">51%</td><td>No</td></tr>
+        <tr><td>New constitution / guardrails script</td><td class="num">75%</td><td class="num">—</td><td>Yes</td></tr>
+        <tr><td>Hard-fork initiation</td><td class="num">60%</td><td class="num">51%</td><td>Yes</td></tr>
+        <tr><td>Parameter change (network / economic / technical)</td><td class="num">67%</td><td class="num">51% only for security-group params</td><td>Yes</td></tr>
+        <tr><td>Parameter change (governance group)</td><td class="num">75%</td><td class="num">—</td><td>Yes</td></tr>
+        <tr><td><strong>Treasury withdrawal</strong></td><td class="num"><strong>67%</strong></td><td class="num">—</td><td>Yes</td></tr>
+        <tr><td>Info action (signalling only)</td><td class="num">—</td><td class="num">—</td><td>Never enacted</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="sim card" id="simulator" aria-labelledby="sim-title">
+    <h2 id="sim-title">Try it: would this action pass?</h2>
+    <p class="small muted">A simplified ratification check using today's thresholds. Move the sliders and watch which body blocks it.</p>
+    <div class="sim-grid">
+      <div class="controls">
+        <label for="sim-action">Action type</label>
+        <select id="sim-action">
+          <option value="treasury">Treasury withdrawal</option>
+          <option value="hardfork">Hard-fork initiation</option>
+          <option value="param">Parameter change (economic/technical)</option>
+          <option value="paramsec">Parameter change (security group)</option>
+          <option value="constitution">New constitution</option>
+          <option value="noconf">Motion of no-confidence</option>
+        </select>
+
+        <label for="sim-drep">DRep "yes" (share of active voting stake): <output id="sim-drep-out">70</output>%</label>
+        <input type="range" id="sim-drep" min="0" max="100" value="70" />
+
+        <label for="sim-spo">SPO "yes" (share of stake): <output id="sim-spo-out">55</output>%</label>
+        <input type="range" id="sim-spo" min="0" max="100" value="55" />
+
+        <label for="sim-cc">Constitutional Committee "yes" votes: <output id="sim-cc-out">5</output> of 7</label>
+        <input type="range" id="sim-cc" min="0" max="7" value="5" />
+      </div>
+      <div class="result" aria-live="polite">
+        <p class="verdict" id="sim-verdict">—</p>
+        <ul id="sim-reasons"></ul>
+      </div>
+    </div>
+    <p class="small muted note">How the denominator works: stake delegated to <strong>Always Abstain</strong> (≈ 10.4B ADA today) and explicit abstentions are removed from the DRep total. Stake whose DRep doesn't vote counts as <em>no</em>, which is why 67% is harder than it looks. We treat the CC as 7 members with no abstentions, so 2/3 means at least 5 yes votes.</p>
+  </section>
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p>The 67% bar is high on purpose, and it bites. In 2026, <strong>28 of 59</strong> withdrawal proposals failed or expired. The Cardano Summit lost at 65.06%. DReps turned down almost every request that would fund a single protocol (Pogun, Bifrost, Strike, DeFi Kernel), and approved large programs run by an administrator instead (PRIME, Critical Integrations, the Orion Fund).</p>
+      <p><strong>What that means for you:</strong> if you're small, go through a program (PRIME grants, Catalyst, the Maintainer Retainer) rather than asking the treasury directly. See <a href="/funding">Get funded</a>.</p>
+    </Callout>
+
+    <h2 id="treasury">The treasury in numbers</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Balance, epoch 660 (≈ 6 Oct 2026)</td><td class="num">₳1,374,649,329</td></tr>
+        <tr><td>Balance, Apr 2026 (epoch 623)</td><td class="num">₳1,663,540,425</td></tr>
+        <tr><td>Balance, Feb 2025 (Constitution ratified)</td><td class="num">₳1,681,719,994</td></tr>
+        <tr><td>Gross inflow</td><td class="num">≈ ₳3.6–3.7M / epoch</td></tr>
+        <tr><td>Withdrawals enacted from 2025 proposals</td><td class="num">40 actions, ≈ ₳347M</td></tr>
+        <tr><td>Withdrawals enacted from 2026 proposals (so far)</td><td class="num">30 actions, ≈ ₳457M</td></tr>
+        <tr><td>Net Change Limit, epochs 613–713 (Feb 2026 → ≈ Jul 2027)</td><td class="num">₳500M</td></tr>
+        <tr><td>Headroom left under that limit <span class="muted">(our calculation)</span></td><td class="num">≈ ₳43M</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <p>The <strong>Net Change Limit</strong> is a cap that DReps agree on for a period. Under the constitution, any withdrawal that would push spending past it is unconstitutional, so the CC would vote it down. With only about ₳43M (≈ $11M) left until July 2027, big new asks are effectively on hold until a new limit is agreed.</p>
+
+    <h2 id="programmable">Governance is programmable</h2>
+    <p>This is the part most builders miss. Governance on Cardano is ledger data and script purposes, which means you can read it, automate it, and write contracts that take part in it.</p>
+    <ul>
+      <li><strong>Treasury smart contracts.</strong> Sundae Labs and Xerberus wrote <code>treasury.ak</code> and <code>vendor.ak</code> in Aiken, audited by TxPipe and MLabs. Withdrawn funds sit in a contract, not a bank account; they vest per milestone; seven permissioned actions (disburse, pause, resume, sweep, …) each have a configurable condition plus optional withdrawal-script hooks for custom logic. Expired funds can be swept back to the treasury by <em>anyone</em>. There's a TypeScript SDK: <code>npm i @sundaeswap/treasury-funds</code>.</li>
+      <li><strong>Structured metadata (CIP-100 / CIP-108).</strong> Every action carries anchor-hashed JSON-LD (title, abstract, motivation, rationale). It's fully indexable, which is how every number on this page was pulled from Koios.</li>
+      <li><strong>Script credentials.</strong> DReps and CC members can be native or Plutus scripts. A multisig team, a token-weighted DAO or a committee can vote as one DRep.</li>
+      <li><strong>The guardrails script.</strong> A Plutus script attached to the constitution automatically rejects out-of-range parameter changes and non-ADA withdrawals. It's governance policy expressed as code.</li>
+      <li><strong>Plutus V3 script purposes</strong> include <code>vote</code> and <code>propose</code>, so validators can see governance activity in the transaction they check.</li>
+    </ul>
+
+    <h2 id="notable">Notable votes</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Action</th><th>Result</th><th>Why it matters to builders</th></tr></thead>
+      <tbody>
+        <tr><td>Cardano PRIME, ₳120M (AlphaGrowth)</td><td><Badge kind="live" label="Enacted" /> 17 Aug 2026, ≈ 73%</td><td>The largest growth program; ₳35M of it is grants. See <a href="/funding#prime">PRIME</a>.</td></tr>
+        <tr><td>Orion Fund, ₳50M (Draper Dragon)</td><td><Badge kind="live" label="Enacted" /> Mar 2026, ≈ 75%</td><td>The first treasury-backed VC fund; returns flow back to the treasury.</td></tr>
+        <tr><td>Critical Integrations V1 ₳70M / V2 ₳23M</td><td><Badge kind="live" label="Enacted" /></td><td>Delivered USDCx, Pyth, Dune; funds LayerZero and Fireblocks.</td></tr>
+        <tr><td>IO 2026 budget (Leios ₳27.7M, Maintenance ₳62.1M, DevEx ₳3.6M …)</td><td><Badge kind="live" label="6 of 9 passed" /></td><td>Core engineering is funded through 2026.</td></tr>
+        <tr><td>CF as Catalyst steward (info)</td><td><Badge kind="live" label="Passed" /> 83%</td><td>Catalyst moved from IOG to the Cardano Foundation.</td></tr>
+        <tr><td>Cardano Summit 2026 (₳7.8M revised)</td><td><Badge kind="failed" /> 65.06% vs 67%</td><td>Shows how hard the 67% bar is.</td></tr>
+        <tr><td>Pogun, IO's Bitcoin DeFi (₳12.29M)</td><td><Badge kind="failed" /> ≈ 36%</td><td>DReps push back on founding-entity product bets.</td></tr>
+        <tr><td>OpenZeppelin Stack (₳11.79M)</td><td><Badge kind="failed" label="Failing" /> ≈ 3.8% yes at epoch 660</td><td>An audited contracts library; outside vendors face a steep bar.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="ask">How to get money directly from the treasury</h2>
+    <ol class="steps">
+      <li><strong>Pre-socialise (1–3 months).</strong> Post on the Cardano Forum and in DRep channels; pitch large DReps. The Cardano Foundation publishes its own review criteria.</li>
+      <li><strong>Check the Net Change Limit.</strong> About ₳43M remains until July 2027 by our count. A withdrawal over the limit is unconstitutional.</li>
+      <li><strong>Choose a route.</strong> Either (a) the <strong>Intersect budget process</strong> (annual window, minimum 100k ADA, 1k ADA fee, 67% off-chain DRep vote; Intersect then submits and administers), or (b) <strong>self-submit</strong> with your own administrator, as Amaru and Dingo did.</li>
+      <li><strong>Meet Constitution v2.4, Article II §7.</strong> State purpose, delivery period, costs and refund conditions; disclose treasury money received in the past 24 months; budget an independent audit; name one or more administrators; keep funds segregated and delegated to Always Abstain; use immutable (IPFS) metadata.</li>
+      <li><strong>Submit on-chain.</strong> Lock the 100,000 ADA deposit (refunded when the action is enacted, expires or is dropped). Voting runs about 30 days.</li>
+      <li><strong>Win ≥ 67% of active DRep stake and a CC "constitutional" vote.</strong> The withdrawal is enacted at the next epoch boundary.</li>
+      <li><strong>Deliver against milestones.</strong> Your administrator releases tranches from the vendor contract and can pause disputed milestones.</li>
+    </ol>
+    <Callout kind="tip">
+      <p>Realistic sizes run from a few hundred thousand to tens of millions of ADA. Established infrastructure maintainers usually clear 67%; small unknown teams rarely do. Build a track record with Catalyst, PRIME grants or the Maintainer Retainer first.</p>
+    </Callout>
+
+    <h2 id="tools">Tooling map</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://gov.tools" rel="noopener">GovTool</a></td><td>Register as a DRep, delegate, propose, vote. Now maintained by Sireto for Intersect.</td></tr>
+        <tr><td><a href="https://1694.io" rel="noopener">1694.io</a></td><td>DRep profiles and metadata.</td></tr>
+        <tr><td>1694.tools</td><td>Proposal explorer.</td></tr>
+        <tr><td><a href="https://tempo.vote" rel="noopener">Tempo.vote</a></td><td>Governance UI.</td></tr>
+        <tr><td>Cardanoscan, Cexplorer, AdaStat, <a href="https://www.cardanocube.com/" rel="noopener">CardanoCube</a></td><td>Explorers with governance views and live vote tallies.</td></tr>
+        <tr><td>Ekklesia + Intersect Hydra-voting</td><td>Off-chain budget polls and Constitutional Committee elections.</td></tr>
+        <tr><td><a href="https://koios.rest" rel="noopener">Koios</a>, Blockfrost, UTxO RPC</td><td>APIs for proposals, votes, DReps and treasury totals.</td></tr>
+        <tr><td><a href="https://github.com/SundaeSwap-finance/treasury-contracts" rel="noopener">treasury-contracts</a></td><td>Aiken validators, CLI and the <code>@sundaeswap/treasury-funds</code> SDK.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <Sources items={sources} />
+  <NextPrev prev={{ href: "/frontiers/midnight", label: "Midnight (privacy)" }} next={{ href: "/frontiers/scaling", label: "Scaling & roadmap" }} />
+</Layout>
+
+<script is:inline>
+  (function () {
+    var rules = {
+      treasury: { name: "Treasury withdrawal", drep: 67, spo: null, cc: true },
+      hardfork: { name: "Hard-fork initiation", drep: 60, spo: 51, cc: true },
+      param: { name: "Parameter change", drep: 67, spo: null, cc: true },
+      paramsec: { name: "Security-group parameter change", drep: 67, spo: 51, cc: true },
+      constitution: { name: "New constitution", drep: 75, spo: null, cc: true },
+      noconf: { name: "No-confidence motion", drep: 67, spo: 51, cc: false },
+    };
+    var $ = function (id) { return document.getElementById(id); };
+    var action = $("sim-action"), drep = $("sim-drep"), spo = $("sim-spo"), cc = $("sim-cc");
+    function render() {
+      var r = rules[action.value];
+      var d = +drep.value, s = +spo.value, c = +cc.value;
+      $("sim-drep-out").textContent = d; $("sim-spo-out").textContent = s; $("sim-cc-out").textContent = c;
+      spo.disabled = r.spo === null; cc.disabled = !r.cc;
+      var reasons = [], ok = true;
+      var dOk = d >= r.drep; ok = ok && dOk;
+      reasons.push((dOk ? "✓ " : "✕ ") + "DReps: " + d + "% yes vs " + r.drep + "% needed");
+      if (r.spo === null) reasons.push("– SPOs don't vote on this action");
+      else { var sOk = s >= r.spo; ok = ok && sOk; reasons.push((sOk ? "✓ " : "✕ ") + "SPOs: " + s + "% yes vs " + r.spo + "% needed"); }
+      if (!r.cc) reasons.push("– The Constitutional Committee doesn't vote on this action");
+      else { var cOk = c >= 5; ok = ok && cOk; reasons.push((cOk ? "✓ " : "✕ ") + "CC: " + c + " of 7 yes vs 5 needed (2/3)"); }
+      var v = $("sim-verdict");
+      v.textContent = ok ? "Ratified — enacted at the next epoch boundary" : "Not ratified — it stays open until it expires (≈ 30 days)";
+      v.className = "verdict " + (ok ? "ok" : "no");
+      var ul = $("sim-reasons"); ul.innerHTML = "";
+      reasons.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    }
+    [action, drep, spo, cc].forEach(function (el) { el.addEventListener("input", render); });
+    render();
+  })();
+</script>
+
+<style>
+  .stats { margin-bottom: 1rem; }
+  .timeline { list-style: none; padding: 0; margin: 0 0 1rem; border-left: 2px solid var(--line); }
+  .timeline li { display: grid; gap: .1rem; padding: 0 0 1rem 1.1rem; position: relative; }
+  .timeline li::before { content: ""; position: absolute; left: -6px; top: .55rem; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+  .timeline .when { font-size: .78rem; color: var(--accent-ink); }
+  .timeline .what { font-size: .95rem; }
+  @media (min-width: 640px) { .timeline li { grid-template-columns: 7.5rem 1fr; gap: 1rem; } }
+  .sim { margin: 2.5rem 0; max-width: 60rem; }
+  .sim h2 { margin-top: 0; padding-top: 0; }
+  .sim-grid { display: grid; gap: 1.5rem; }
+  @media (min-width: 760px) { .sim-grid { grid-template-columns: 1fr 1fr; } }
+  .controls { display: grid; gap: .35rem; }
+  .controls label { font-size: .9rem; margin-top: .6rem; }
+  .controls select { font: inherit; font-size: .92rem; padding: .45rem .5rem; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); max-width: 100%; }
+  .controls input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .controls input:disabled { opacity: .35; }
+  .result { background: var(--surface-2); border-radius: var(--radius-sm); padding: 1rem 1.1rem; }
+  .verdict { font-weight: 600; margin: 0 0 .6rem; }
+  .verdict.ok { color: var(--live); }
+  .verdict.no { color: var(--gap); }
+  .result ul { list-style: none; padding: 0; margin: 0; font-family: var(--font-mono); font-size: .82rem; }
+  .note { margin: 1rem 0 0; }
+  .steps li { margin-bottom: .6rem; }
+</style>

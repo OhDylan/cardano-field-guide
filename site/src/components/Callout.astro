@@ -1,0 +1,23 @@
+---
+// kind: note (neutral), honest (the uncomfortable fact), tip (do this), warn (risk)
+interface Props { kind?: "note" | "honest" | "tip" | "warn"; title?: string }
+const { kind = "note", title } = Astro.props;
+const labels = { note: "Note", honest: "Honest take", tip: "Builder tip", warn: "Watch out" };
+---
+<aside class={`callout ${kind}`}>
+  <p class="label">{title ?? labels[kind]}</p>
+  <div class="body"><slot /></div>
+</aside>
+<style>
+  .callout { border: 1px solid var(--line); border-left-width: 3px; border-radius: var(--radius-sm); background: var(--surface); padding: .9rem 1.1rem; margin: 1.4rem 0 1.6rem; }
+  .label { font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; margin: 0 0 .35rem; color: var(--ink-2); font-weight: 500; }
+  .body :global(> :last-child) { margin-bottom: 0; }
+  .body { font-size: .96rem; }
+  .note { border-left-color: var(--line-strong); }
+  .honest { border-left-color: var(--gap); }
+  .honest .label { color: var(--gap); }
+  .tip { border-left-color: var(--live); }
+  .tip .label { color: var(--live); }
+  .warn { border-left-color: var(--coming); }
+  .warn .label { color: var(--coming); }
+</style>

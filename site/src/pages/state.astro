@@ -1,0 +1,185 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Stat from "../components/Stat.astro";
+import Callout from "../components/Callout.astro";
+import Badge from "../components/Badge.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+import TvlChart from "../components/TvlChart.astro";
+
+const broke = [
+  { date: "Sep 2025", what: "Milkomeda, the EVM sidechain, shut down", means: "There is no EVM execution on Cardano. Solidity logic has to be rewritten." },
+  { date: "Jan 2026", what: "Catalyst Fund 15 paused before voting; stewardship moved to the Cardano Foundation", means: "The best-known grant program is now a small, usage-based pilot (2.5M ADA)." },
+  { date: "May 2026", what: "JPG Store, the main NFT marketplace, closed", means: "NFT trading on Cardano has no default venue right now." },
+  { date: "May 2026", what: "Cardano Summit 2026 cancelled after its treasury vote reached 65.06% (67% needed)", means: "The 67% DRep bar is hard, even for established organizations." },
+  { date: "Jun 2026", what: "TapTools (analytics and API) began winding down", means: "Builders lost a popular data API, and the analytics niche is open." },
+  { date: "Jul 2026", what: "SecondFi (formerly Yoroi) wallet exploit: about 16M ADA taken from 374 wallets. EMURGO left the Pentad", means: "Wallet-layer security is a real risk, and one founding entity has stepped back." },
+  { date: "Jul 2026", what: "DeltaDeFi (Hydra order book) paused for lack of funding", means: "Good technology still needs distribution and runway." },
+  { date: "Sep 2026", what: "Input Output said it is no longer \"Cardano-first-and-forever\"", means: "The founding engineering company will pick chains product by product." },
+];
+const shipped = [
+  { date: "Feb 2026", what: "USDCx: Circle xReserve-backed USDC, Ethereum ↔ Cardano", kind: "live" },
+  { date: "2026", what: "Pyth Pro pull oracles and Dune analytics, funded by the 70M ADA Critical Integrations budget", kind: "live" },
+  { date: "Feb 2026 →", what: "LayerZero integration announced and rolling out in phases", kind: "unverified", note: "We could not confirm a public mainnet endpoint" },
+  { date: "Mar 2026", what: "Midnight mainnet (genesis 17 Mar), federated operators", kind: "live" },
+  { date: "Mar 2026", what: "Orion Fund: 50M ADA from the treasury into an $80M venture fund", kind: "live" },
+  { date: "Apr 2026", what: "Hydra v2 (heads open without a commit phase)", kind: "live" },
+  { date: "Jun 2026", what: "Ouroboros Leios public testnet (\"Musashi Dojo\")", kind: "coming" },
+  { date: "Jul 2026", what: "van Rossem hard fork: new Plutus builtins and cheaper scripts; the first hard fork ratified fully on-chain", kind: "live" },
+  { date: "Aug 2026", what: "Cardano PRIME: 120M ADA DeFi growth program with an open RFP", kind: "live" },
+  { date: "Sep 2026", what: "x402 agent payments: @x402/cardano in the official SDK (facilitator proven on Preprod)", kind: "coming" },
+  { date: "Sep 2026", what: "FC Barcelona's Barça Fan Lab launches on Cardano (Catalyst Fund 13)", kind: "live" },
+  { date: "Nov 2026 target", what: "Amaru (Rust node) block production; already running as a mainnet relay", kind: "coming" },
+] as const;
+const sources = [
+  { label: "DefiLlama: Cardano TVL history (api.llama.fi/v2/historicalChainTvl/Cardano)", url: "https://defillama.com/chain/Cardano" },
+  { label: "DefiLlama: ADA price history (coins.llama.fi)", url: "https://coins.llama.fi/prices/current/coingecko:cardano" },
+  { label: "DefiLlama: stablecoins on Cardano", url: "https://defillama.com/stablecoins/Cardano" },
+  { label: "Koios API: tip, totals, epoch_info (queried 2026-10-07)", url: "https://api.koios.rest/api/v1/totals" },
+  { label: "Cardano Foundation: 2025 developer ecosystem survey (cites Electric Capital 2024)", url: "https://cardanofoundation.org/blog/2025-developer-ecosystem-survey-results" },
+  { label: "CF State of the Developer Ecosystem 2025 (full results)", url: "https://cardano-foundation.github.io/state-of-the-developer-ecosystem/2025/" },
+  { label: "IOG: Developer Experience Initiative (\"17x fewer developers\")", url: "https://www.iog.io/news/developer-experience-initiative" },
+  { label: "CoinDesk: crypto developer activity at multi-year low (Mar 2026)", url: "https://www.coindesk.com/tech/2026/03/12/crypto-developer-activity-sinks-to-multi-year-low-as-ai-absorbs-github-s-talent-boom" },
+  { label: "Cointelegraph: DeFi TVL falls 39% in 2026", url: "https://cointelegraph.com/news/defi-tvl-falls-39-2026-erases-45b-value" },
+  { label: "The Block: EMURGO steps down from Pentad after wallet exploit", url: "https://www.theblock.co/news/ecosystems/2026-07-08-cardano-founding-entity-emurgo-steps-down-pentad-governance-role-wallet-exploit-407593" },
+  { label: "The Block: TapTools winds down", url: "https://www.theblock.co/post/403457/taptools-winds-down" },
+  { label: "MEXC explainer: \"wave of failures\", JPG Store", url: "https://www.mexc.com/learn/article/is-cardano-ada-dead-its-founder-just-warned-of-a-wave-of-failures-/1" },
+  { label: "The Block: Cardano Summit 2026 cancelled", url: "https://www.theblock.co/amp/post/403122/cardano-foundation-cancels-2026-summit-after-treasury-funding-vote-falls-just-short" },
+  { label: "CryptoSlate: Hoskinson, IO no longer Cardano-first", url: "https://cryptoslate.com/charles-hoskinson-says-cardano-no-longer-comes-first-its-treasury-vote-explains-why/" },
+  { label: "Cardano.org: Critical Integrations closure report", url: "https://cardano.org/news/2026-05-15-cardano-critical-integrations/" },
+  { label: "Santiment Q1 2026 GitHub activity ranking", url: "https://bex.co/blog/2026/03/15/santiment-q1-2026-github-activity-rankings-developer-commits-building-vs-marketing" },
+  { label: "Forum: Milkomeda / EVM interoperability status", url: "https://forum.cardano.org/t/current-status-of-cardano-evm-interoperability-milkomeda-rosen/153432" },
+];
+---
+<Layout title="State of Cardano" description="Cardano's on-chain numbers for October 2026, without spin, and what they mean if you build here.">
+  <PageHeader eyebrow="State of Cardano · October 2026" title="The numbers, without spin" lede="If you are deciding where to spend your next six months, you deserve the real figures. Here they are, with the context that makes them readable and what each one means for a builder." />
+
+  <div class="grid grid-3 wide stats">
+    <Stat label="DeFi TVL" value="$73M" sub="Rank #36 of all chains (DefiLlama, Oct 7). About 270M ADA." />
+    <Stat label="Stablecoins on Cardano" value="$67M" sub="Rank #40. ~69% is USDC/USDCx. No native USDT." />
+    <Stat label="DEX volume" value="~$4M / day" sub="~$82M over 30 days. Solana does ~$2.4B a day." />
+    <Stat label="Transactions" value="18–32k / day" sub="Down from ~72k/day in Nov 2024 (Koios)." />
+    <Stat label="On-chain treasury" value="1.37B ADA" sub="≈ $366M. Spent by on-chain vote; see Governance." />
+    <Stat label="Monthly active devs" value="672" sub="276 full-time; rank #15 (Electric Capital 2024 data)." />
+  </div>
+  <p class="stamp">Snapshot taken 2026-10-07. Numbers move; check the linked sources for today's values.</p>
+
+  <div class="prose">
+    <h2 id="tvl">Did TVL really fall 87%?</h2>
+    <p>You may have seen "Cardano TVL is down 87% from its peak". The arithmetic is right: $721M on 7 Dec 2024, $73M today. But it mixes two different things, the price of ADA and the amount of capital actually locked in contracts. Most Cardano DeFi deposits are ADA, so when ADA's price moves, dollar TVL moves with it even if nobody deposits or withdraws anything.</p>
+    <p>Split the two apart and a clearer story appears.</p>
+  </div>
+
+  <div class="wide"><TvlChart /></div>
+
+  <div class="prose">
+    <ol>
+      <li><strong>The December 2024 peak was a price spike.</strong> ADA briefly traded around $1.08. Measured in ADA, the amount locked that month (~612M ADA) was in line with the rest of 2024.</li>
+      <li><strong>From mid-2023 to mid-2026, locked capital was roughly flat</strong> at 450–650M ADA. In the first half of 2026 it actually grew, from ~462M ADA in February to ~560M ADA in June. If it felt like TVL was slowly recovering, that's because, in ADA terms, it was.</li>
+      <li><strong>Then came a real outflow.</strong> Between 1 July and 6 October 2026, locked ADA fell from ~512M to ~270M, about <strong>−47% in three months</strong>, spread across the largest protocols (Minswap, Liqwid, SundaeSwap). It overlaps with the SecondFi wallet exploit (8 July), DeltaDeFi's pause (15 July) and an industry-wide DeFi contraction (DeFi TVL −39% in 2026). Those events happened at the same time; we can't prove they caused it.</li>
+      <li><strong>The September→October bounce</strong> ($58M → $73M) is mostly ADA's price recovering. In ADA terms it is flat.</li>
+    </ol>
+
+    <Callout kind="honest">
+      <p>Both framings are true, and both matter. Cardano DeFi was never large: even at its best it was a mid-tier Solana protocol in size. And the last three months show capital leaving, not just prices falling. Anyone who tells you otherwise is selling something.</p>
+    </Callout>
+    <Callout kind="tip" title="What this means for you">
+      <ul>
+        <li><strong>If your product needs deep liquidity on day one</strong> (perps, large AMMs, leverage), Cardano is a hard place to launch today. Thin TVL means high slippage and compressed yields.</li>
+        <li><strong>If your product creates liquidity or infrastructure</strong> (vaults, money markets, bridges, wallets), there is now money specifically for that: Cardano PRIME's RFP targets +$200M TVL and pays grants against it. See <a href="/funding">Get funded</a>.</li>
+        <li><strong>If your product doesn't depend on DeFi TVL</strong> (payments, identity, agent commerce, privacy, tooling), the TVL number barely matters to you.</li>
+      </ul>
+    </Callout>
+
+    <h2 id="2026">2026 so far</h2>
+    <p>It was a year of hard knocks at the application layer and real progress at the infrastructure layer. Both lists matter.</p>
+
+    <h3>What broke</h3>
+  </div>
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>When</th><th>What happened</th><th>Why a builder should care</th></tr></thead>
+      <tbody>{broke.map((b) => <tr><td class="nowrap">{b.date}</td><td>{b.what}</td><td>{b.means}</td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <div class="prose"><h3>What shipped</h3></div>
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>When</th><th>What</th><th>Status</th></tr></thead>
+      <tbody>{shipped.map((s) => <tr><td class="nowrap">{s.date}</td><td>{s.what}{"note" in s && s.note && <span class="muted small"> ({s.note})</span>}</td><td><Badge kind={s.kind} /></td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="developers">Developers: the real gap</h2>
+    <p>This site exists because of this section. By Electric Capital's 2024 data (cited by the Cardano Foundation), Cardano had about <strong>672 monthly active developers</strong>, ranked #15. Input Output's own 2026 proposal says Cardano has <strong>"around 17x fewer developers than Ethereum"</strong> and that the gap is widening. Ethereum and Solana each gained more than 11,000 new developers in the first nine months of 2025.</p>
+    <p>You may also see Cardano ranked #6 by GitHub activity (Santiment, Q1 2026). That's true too, but most of those commits are core-protocol research and engineering: Leios, Plutus, Mithril, formal methods. Commit counts measure the protocol team, not the app layer. Independent app builders are a much smaller group: the Cardano Foundation's 2025 developer survey reached 109 of them.</p>
+    <p>The whole industry is shrinking too: weekly crypto commits are down about 75% since early 2025 as engineers move to AI. Cardano is competing for a smaller, more experienced, multichain pool of developers.</p>
+
+    <h3>What developers say is wrong</h3>
+    <p>From the Cardano Foundation's 2025 survey, in their words:</p>
+    <ul>
+      <li>"Fragmented documentation scattered across sources with no single 'blessed path'."</li>
+      <li>"Difficulty going from zero to a working dApp in any environment."</li>
+      <li>"Poor off-chain/on-chain integration; fractured tooling ecosystems."</li>
+      <li>"Fear/hesitance from VCs and limited funding pathways beyond Catalyst."</li>
+      <li>"Difficulty finding up-to-date information without relying on Twitter."</li>
+    </ul>
+    <h3>What developers say is right</h3>
+    <ul>
+      <li>Transaction determinism from the eUTxO model: you know the result and the fee before you submit.</li>
+      <li>Native assets as first-class ledger objects: no token contract to write or audit.</li>
+      <li>"A treasury-funded ecosystem that empowers contributors."</li>
+      <li>Aiken, plus solid infrastructure from TxPipe, Ogmios and Mesh.</li>
+    </ul>
+    <Callout kind="note" title="Outdated objections">
+      <p><strong>"You need Haskell."</strong> No: more than 75% of surveyed developers use Aiken. <strong>"There's no stablecoin, oracle or bridge."</strong> Mostly no longer true: USDCx, Pyth and Dune are live, and LayerZero is rolling out. <strong>"There are no docs."</strong> The official portal now has a curriculum, templates and AI skills. The newer problems are discoverability and incentives, and this site tries to fix those.</p>
+    </Callout>
+
+    <h2 id="fit">Should you build here?</h2>
+  </div>
+  <div class="grid grid-2 wide">
+    <div class="card">
+      <h3>Good fit today</h3>
+      <ul>
+        <li>Open-source infrastructure and developer tooling (the treasury pays maintainers).</li>
+        <li>Liquidity infrastructure that PRIME is paying for: vaults, money markets, bridges, dual-stack wallets.</li>
+        <li>Payments, identity and credentials (USDCx, native assets, CIP-113 programmable tokens).</li>
+        <li>AI-agent commerce: Masumi escrow, x402.</li>
+        <li>Privacy apps on Midnight.</li>
+        <li>Being "the default X" in a category that is now empty (analytics, NFT marketplace).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Hard fit today</h3>
+      <ul>
+        <li>Anything needing deep DeFi liquidity or a large retail user base on day one.</li>
+        <li>Solidity code you want to port without rewriting (no EVM).</li>
+        <li>Trust-minimized BTC products that need a production BTC bridge (none yet).</li>
+        <li>Large single-protocol treasury asks: DReps have rejected most of them in 2026.</li>
+        <li>Teams that need a mature, single "blessed" SDK path (still fragmented, fix in progress).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="prose">
+    <h2 id="method">How we read numbers on this site</h2>
+    <ul>
+      <li>Every number has a date and a source. Live widgets fall back to a dated snapshot if an API is unreachable.</li>
+      <li>We show TVL in ADA as well as USD whenever price could mislead.</li>
+      <li>We don't use commit rankings as a pitch. They measure the protocol team, not adoption.</li>
+      <li>Anything we couldn't confirm carries an <Badge kind="unverified" /> tag.</li>
+    </ul>
+    <Sources items={sources} />
+  </div>
+  <NextPrev prev={{ href: "/", label: "Home" }} next={{ href: "/mental-model", label: "The mental model" }} />
+</Layout>
+
+<style>
+  .stats { margin-bottom: .6rem; }
+  .nowrap { white-space: nowrap; }
+  .grid.wide { margin: 1rem 0 2rem; }
+  .card ul { padding-left: 1.1rem; font-size: .95rem; margin: 0; }
+</style>

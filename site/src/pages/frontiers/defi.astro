@@ -1,0 +1,318 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FrontierTabs from "../../components/FrontierTabs.astro";
+import LiveFourWay from "../../components/LiveFourWay.astro";
+import Badge from "../../components/Badge.astro";
+import Callout from "../../components/Callout.astro";
+import Stat from "../../components/Stat.astro";
+import Sources from "../../components/Sources.astro";
+import NextPrev from "../../components/NextPrev.astro";
+
+const sources = [
+  { label: "DefiLlama — Cardano chain TVL history (API)", url: "https://api.llama.fi/v2/historicalChainTvl/Cardano" },
+  { label: "DefiLlama — Cardano chain page", url: "https://defillama.com/chain/Cardano" },
+  { label: "DefiLlama — stablecoins on Cardano", url: "https://defillama.com/stablecoins/Cardano" },
+  { label: "AlphaGrowth — Cardano PRIME", url: "https://alphagrowth.io/cardano-prime" },
+  { label: "AlphaGrowth — PRIME contact form", url: "https://alphagrowth.typeform.com/cardano-prime" },
+  { label: "The Crypto Basic — DReps approve 120M ADA PRIME (2026-08-12)", url: "https://thecryptobasic.com/2026/08/12/cardano-community-approves-120-million-ada-allocation-to-boost-defi-liquidity/" },
+  { label: "danonight — PRIME treasury withdrawal details", url: "https://danonight.com/news/cardano-prime-treasury-withdrawal" },
+  { label: "DailyCoin — PRIME RFP scope", url: "https://dailycoin.com/cardanos-200m-defi-push-puts-evm-liquidity-in-focus/" },
+  { label: "CoinTurk — PRIME audit score 51.3/100", url: "https://en.coin-turk.com/cardano-gains-7-5yuzde-audit-reveals-defi-weaknesses-as-ada-nears-0-25/" },
+  { label: "Intersect — Critical Integrations progress & Pentad V2", url: "https://intersectmbo.org/news/critical-integrations-technical-progress-update-and-pentad-v2" },
+  { label: "cardano.org — Critical Integrations closure report", url: "https://cardano.org/news/2026-05-15-cardano-critical-integrations/" },
+  { label: "Circle — USDCx on Cardano via xReserve", url: "https://www.circle.com/blog/usdcx-on-cardano-now-available-via-circle-xreserve" },
+  { label: "IOG — Cardano is connecting to all of crypto (LayerZero)", url: "https://www.iog.io/news/cardano-is-connecting-to-all-of-crypto" },
+  { label: "CryptoSlate — Hoskinson: Cardano no longer comes first", url: "https://cryptoslate.com/charles-hoskinson-says-cardano-no-longer-comes-first-its-treasury-vote-explains-why/" },
+  { label: "IOG — Why Pogun's Bitcoin DeFi architecture is achievable", url: "https://www.iog.io/news/why-pogun-bitcoin-defi-architecture-is-achievable" },
+  { label: "CoinDesk — Ordinals bridged to Cardano through BitVMX (Cardinal)", url: "https://www.coindesk.com/tech/2025/05/23/bitcoin-ordinals-can-now-be-bridged-to-cardano-through-bitvmx" },
+  { label: "BEX — Bifrost bridge (FluidTokens)", url: "https://bex.co/blog/2026/01/26/bitcoin-cardano-bifrost-bridge-fluidtokens-btcfi" },
+  { label: "FluidTokens — BTC/ETH-key accounts repo", url: "https://github.com/FluidTokens/ft-cardano-btc-eth-accounts" },
+  { label: "The Block — EMURGO steps down from Pentad after SecondFi exploit", url: "https://www.theblock.co/news/ecosystems/2026-07-08-cardano-founding-entity-emurgo-steps-down-pentad-governance-role-wallet-exploit-407593" },
+  { label: "Cointelegraph — DeFi TVL falls 39% in 2026", url: "https://cointelegraph.com/news/defi-tvl-falls-39-2026-erases-45b-value" },
+  { label: "Pyth — Cardano consumer integration", url: "https://docs.pyth.network/price-feeds/pro/integrate-as-consumer/cardano" },
+  { label: "Minswap SDK", url: "https://github.com/minswap/sdk" },
+  { label: "SundaeSwap SDK", url: "https://github.com/SundaeSwap-finance/sundae-sdk" },
+  { label: "DexHunter partner API", url: "https://dexhunter.gitbook.io/dexhunter-partners/api-reference/api" },
+  { label: "DeFi Kernel", url: "https://defikernel.org" },
+  { label: "Anastasia Labs — Aiken design patterns", url: "https://github.com/Anastasia-Labs/aiken-design-patterns" },
+  { label: "Cardano IBC incubator", url: "https://github.com/cardano-foundation/cardano-ibc-incubator" },
+  { label: "Cardano testnet faucet", url: "https://docs.cardano.org/cardano-testnets/tools/faucet" },
+];
+---
+<Layout title="DeFi & Bitcoin DeFi" description="What Cardano DeFi looks like in late 2026: honest numbers, the treasury-funded catch-up, Cardano PRIME, Bitcoin DeFi status and the gaps a new builder can fill.">
+  <FrontierTabs />
+  <PageHeader eyebrow="Frontier · DeFi & BTCfi" title="DeFi & Bitcoin DeFi" lede="Cardano DeFi is small, and it shrank sharply in the last three months. It also has open-source protocols you can compose with, a treasury-funded program paying for missing primitives, and a Bitcoin DeFi story that is mostly still pre-mainnet. Here is the whole picture, with numbers." />
+
+  <div class="grid grid-3 stats">
+    <Stat label="DeFi TVL (DefiLlama)" value="$73M" sub="Rank #36 of all chains · 2026-10-06" />
+    <Stat label="DEX volume" value="≈$4M / day" sub="≈$82M over 30 days · rank ≈#40" />
+    <Stat label="Stablecoins on Cardano" value="$67.4M" sub="USDC/USDCx $46.6M · USDM $13.6M · USDA $4.2M · DJED, iUSD ≈$1.4M each" />
+  </div>
+
+  <div class="prose">
+    <Callout kind="honest" title="Read the TVL number carefully">
+      <p>Headlines say Cardano TVL is "down 87% from its peak". In dollars that is true, but misleading. The $721M peak (2024-12-07) came during a short ADA price spike to about $1.08. <strong>Measured in ADA, TVL was roughly flat at 450–650M ADA from mid-2023 until July 2026</strong>, and it even grew in the first half of 2026.</p>
+      <p>The real decline is recent: from about <strong>512M ADA on 1 July 2026 to about 270M ADA in early October (≈ −47%)</strong>, across the largest protocols (Minswap, Liqwid, SundaeSwap). It coincides with the SecondFi wallet exploit (8 July), DeltaDeFi pausing (15 July) and an industry-wide DeFi contraction (DeFi TVL −39% year to date). Those are coinciding events, not a proven cause. <a href="/state">See the chart and the full breakdown →</a></p>
+    </Callout>
+    <p><strong>What that means for you:</strong> liquidity is thin, so anything that needs deep markets on day one is a bad fit. On the other hand, the ecosystem has a funded program (PRIME) that explicitly pays for the primitives it is missing, and many categories have one weak incumbent or none.</p>
+  </div>
+
+  <LiveFourWay>
+    <ul slot="live">
+      <li>AMM DEXes (Minswap, SundaeSwap, WingRiders, Splash), order books (Dano, Genius Yield)</li>
+      <li>Lending: Liqwid (pooled), Surf (isolated), FluidTokens (P2P)</li>
+      <li>USDCx (Circle xReserve) since 2026-02-27, Pyth Pro oracles, Dune</li>
+      <li>Perps: Strike Finance V2</li>
+      <li>Synthetic BTC exposure (Indigo iBTC), small federated bridges</li>
+    </ul>
+    <ul slot="coming">
+      <li>LayerZero (phased; public mainnet endpoint not confirmed) <Badge kind="unverified" /></li>
+      <li>Fireblocks native integration (funded June 2026)</li>
+      <li>Nested transactions and Babel fees in the Dijkstra hard fork (est. Dec 2026–Mar 2027)</li>
+      <li>Pogun BTC credit market (target ≈ mid-Dec 2026), Bifrost bridge (BTC testnet)</li>
+    </ul>
+    <ul slot="gaps">
+      <li>Vault standard (ERC-4626 equivalent) and automated liquidity management</li>
+      <li>Curated / isolated money markets on USDCx</li>
+      <li>Dual-stack (EVM + Cardano) wallets, EVM→Cardano bridge routing</li>
+      <li>Shared batcher / solver network for orders and intents</li>
+      <li>Trust-minimised BTC in production; prediction markets (empty)</li>
+    </ul>
+    <ul slot="try">
+      <li>Minswap V2 + SDK on <strong>Preprod</strong></li>
+      <li>SundaeSwap on <strong>Preview</strong></li>
+      <li>Pyth Pro price updates on Preprod (needs a Lazer token)</li>
+      <li>Charli3 pull oracle client on Preprod</li>
+      <li>Bifrost fBTC bridge between Bitcoin testnet and Cardano testnet</li>
+    </ul>
+  </LiveFourWay>
+
+  <h2>Protocol landscape</h2>
+  <p class="prose">Cardano TVL by protocol, DefiLlama, 2026-10-07. Most protocols lost 50–70% of their dollar TVL since January; FluidTokens and Surf held or grew.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>Protocol</th><th class="num">TVL</th><th>Builder notes</th></tr></thead>
+      <tbody>
+        <tr><td>DEX (AMM)</td><td><strong>Minswap</strong></td><td class="num">$18.9M</td><td>Largest DEX. V2 contracts, stableswap pools, aggregator. Open-source SDK, deployed on Preprod.</td></tr>
+        <tr><td>DEX (AMM)</td><td><strong>SundaeSwap</strong> V2/V3/V4</td><td class="num">≈$3.9M</td><td>V2 has the highest 30-day volume on DefiLlama. SDK and V3 contracts public.</td></tr>
+        <tr><td>DEX (bonds / order book)</td><td><strong>Dano Finance</strong></td><td class="num">$7.1M</td><td>Trades Optim bond tokens. Champions the open DeFi Kernel order standard.</td></tr>
+        <tr><td>DEX (hybrid)</td><td><strong>Splash</strong></td><td class="num">$2.7M</td><td>Off-chain execution engine anyone can run.</td></tr>
+        <tr><td>DEX</td><td><strong>WingRiders</strong></td><td class="num">$1.5M</td><td>V2 contracts public.</td></tr>
+        <tr><td>DEX (Hydra L2)</td><td><strong>DeltaDeFi</strong></td><td class="num">≈$0</td><td><Badge kind="paused" /> Paused 2026-07-15 for lack of funding.</td></tr>
+        <tr><td>Lending (pooled)</td><td><strong>Liqwid</strong></td><td class="num">$13.8M</td><td>Largest money market. About 3M USDCx supplied in USDCx's first week.</td></tr>
+        <tr><td>Lending (isolated)</td><td><strong>Surf Lending</strong></td><td class="num">$4.0M</td><td>Isolated markets; held steady through 2026.</td></tr>
+        <tr><td>Lending (P2P / BTCfi infra)</td><td><strong>FluidTokens</strong></td><td class="num">$3.7M</td><td>P2P loans v4, Aquarium fee tanks, BTC/ETH-key accounts, Bifrost bridge. Grew in 2026.</td></tr>
+        <tr><td>CDP / synthetics</td><td><strong>Indigo</strong></td><td class="num">$4.8M</td><td>iUSD, iBTC, iETH, iSOL. Open SDK and the <code>dexter</code> multi-DEX library.</td></tr>
+        <tr><td>Perps</td><td><strong>Strike Finance</strong></td><td class="num">$1.9M</td><td>Perps, options, forwards contracts, a Hummingbot connector. Its 9M ADA liquidity request expired.</td></tr>
+        <tr><td>Stablecoin</td><td><strong>Djed</strong></td><td class="num">$6.6M</td><td>Over-collateralised algorithmic stablecoin (reserve).</td></tr>
+        <tr><td>Aggregators</td><td>DexHunter, Steelswap</td><td class="num">—</td><td>DexHunter routes across 15+ DEXes and has a partner API with revenue share.</td></tr>
+        <tr><td>Prediction markets</td><td>Bodega</td><td class="num">≈$0</td><td>Effectively an empty category.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>2026: the infrastructure catch-up</h2>
+  <div class="prose">
+    <p>The most common 2024 objection was "no real stablecoin, no serious oracle, no bridge". The treasury paid to close it. The <strong>₳70M Critical Integrations</strong> program (enacted December 2025, run by the Pentad and administered by Intersect) and a <strong>₳23M follow-up</strong> (enacted 2026-06-23) delivered:</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Integration</th><th>Status</th><th>What it gives you</th></tr></thead>
+      <tbody>
+        <tr><td><strong>USDCx</strong> (Circle xReserve)</td><td><Badge kind="live" /> since 2026-02-27</td><td>Deposit USDC into Circle's xReserve on Ethereum; USDCx is minted 1:1 on Cardano. Now about 69% of Cardano's stablecoin supply. Bridge UI at usdcx.iog.io/bridge.</td></tr>
+        <tr><td><strong>Pyth Pro</strong> (Lazer)</td><td><Badge kind="live" /></td><td>Pull oracle: signed updates verified on-chain via a withdraw-zero script, read as a reference input. TS SDK plus an Aiken library.</td></tr>
+        <tr><td><strong>Dune</strong></td><td><Badge kind="live" /></td><td>Cardano data in Dune for dashboards and attribution.</td></tr>
+        <tr><td><strong>LayerZero v2</strong></td><td><Badge kind="coming" label="Phased" /> <Badge kind="unverified" /></td><td>Announced Feb 2026: endpoints → Stargate liquidity → dev tools. LayerZero's own deployments list had no Cardano entry on 2026-10-07, so a public mainnet endpoint is not confirmed.</td></tr>
+        <tr><td><strong>Fireblocks</strong></td><td><Badge kind="coming" /></td><td>Native integration funded in the second round. Matters for institutional LPs and market makers.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="prime">Cardano PRIME: the program paying for missing DeFi</h2>
+  <div class="prose">
+    <p><strong>PRIME</strong> (Protocol Readiness, Incentives, and Market Expansion) is a <strong>₳120M (≈$19.2M)</strong>, 12-month DeFi growth program run by <strong>AlphaGrowth</strong>. DReps approved it with 73% of participating stake and it was enacted on 17 August 2026. It is not part of Catalyst.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><th>Phases</th><td>P1 (months 1–2): public audit of Cardano DeFi across 20–25 categories. P2 (months 2–4): gap analysis and grants. P3 (months 5–12): incentives, LP deals, liquidity campaigns. About ₳90M is held back until a month-4 vote by the Operating Group (≈ mid-December 2026).</td></tr>
+        <tr><th>Budget</th><td>Ecosystem grants $5.6M (₳35M; $3M in Phase 2, $3M gated). LP incentives $4.32M. A performance fee paid only against verified TVL growth. No single grant over $1M.</td></tr>
+        <tr><th>Oversight</th><td>A 5-member unpaid Operating Group (Blink Labs, CoinCeylon, Midgard Labs, Input Output, Tweag) with a 3-of-5 veto. Intersect holds the funds.</td></tr>
+        <tr><th>Audit result</th><td>Cardano DeFi scored <strong>51.3/100</strong> (Ethereum 96.3, Sui 72.3). Gaps: bridging, wallets, money markets, automated liquidity management, among others.</td></tr>
+        <tr><th>Target</th><td>+$200M of "qualifying" TVL in 12 months.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid grid-2 rfp">
+    <div class="card">
+      <h3>The four priority RFP areas</h3>
+      <ol>
+        <li><strong>Dual-stack wallets</strong> (EVM + Cardano)</li>
+        <li><strong>EVM → Cardano bridge</strong> routes from Ethereum, Base, Arbitrum</li>
+        <li><strong>Lending and vault standards</strong></li>
+        <li><strong>Liquidity tooling and infrastructure</strong></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Also in scope</h3>
+      <ul>
+        <li>A common batcher ("scooper") standard</li>
+        <li>eUTxO-native vaults, concentrated liquidity, automated LP management</li>
+        <li>A second independent price feed</li>
+        <li>Curated lending markets, yield-bearing CDP collateral</li>
+        <li>Order-book hardening, a "DeFi Gateway SDK" with custody adapters</li>
+      </ul>
+    </div>
+  </div>
+  <div class="prose">
+    <Callout kind="tip" title="How to apply">
+      <p>The rule of thumb is <strong>$50 of sustained TVL per $1 of grant</strong>. The only public intake we found is the <a href="https://alphagrowth.typeform.com/cardano-prime" target="_blank" rel="noopener">AlphaGrowth PRIME contact form</a>, plus AlphaGrowth on X and its Telegram. No RFP portal or deadline has been published <Badge kind="unverified" />; press coverage called the process "murky". Pitch early, while the Phase 2 grant envelope (Sep–Dec 2026) is still open. Compare every funding route on <a href="/funding">Get funded</a>.</p>
+    </Callout>
+  </div>
+
+  <h3>What DReps fund, and what they don't</h3>
+  <p class="prose">In 2025–2026 the pattern was consistent: DReps approved large, <em>administered</em> programs and rejected nearly every single-protocol request. If you need treasury money for DeFi, go through a program, not around it.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Request</th><th class="num">ADA</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>Cardano PRIME (AlphaGrowth)</td><td class="num">120M</td><td><Badge kind="live" label="Enacted" /></td></tr>
+        <tr><td>Critical Integrations V1 / V2</td><td class="num">70M / 23M</td><td><Badge kind="live" label="Enacted" /></td></tr>
+        <tr><td>Orion Fund (Draper Dragon, venture fund)</td><td class="num">50M</td><td><Badge kind="live" label="Enacted" /></td></tr>
+        <tr><td>Pogun (IO-backed BTC DeFi)</td><td class="num">12.29M</td><td><Badge kind="failed" /> 35.7% yes</td></tr>
+        <tr><td>Bifrost road to mainnet (FluidTokens + Lantr)</td><td class="num">12.33M</td><td><Badge kind="failed" label="Expired" /></td></tr>
+        <tr><td>Alchemy (Sundial × Charms)</td><td class="num">10M</td><td><Badge kind="failed" label="Expired" /></td></tr>
+        <tr><td>Strike Finance liquidity deployment</td><td class="num">9M</td><td><Badge kind="failed" label="Expired" /></td></tr>
+        <tr><td>Global Order Book / DeFi Kernel (Dano)</td><td class="num">3.33M</td><td><Badge kind="failed" label="Expired" /></td></tr>
+        <tr><td>OpenZeppelin Stack (contracts library + reference impls)</td><td class="num">11.79M</td><td><Badge kind="coming" label="Voting" /> failing at epoch 660 (≈4% yes)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="btcfi">Bitcoin DeFi on Cardano</h2>
+  <div class="prose">
+    <p><strong>The thesis:</strong> Cardano's eUTxO model shares its lineage with Bitcoin's UTXO model, so Input Output pitches Cardano as the natural place for Bitcoin DeFi, with BTC users paying fees in ADA. The thesis is coherent. Delivery has lagged: in September 2026, after Pogun's treasury request failed, Charles Hoskinson said IO will "choose the best network for each product" rather than follow a Cardano-first policy, while still targeting Pogun on Cardano around mid-December 2026.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Rail</th><th>Trust model</th><th>Status (Oct 2026)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cardinal</strong> (IO + BitVMX / Fairgate)</td><td>BitVM-style 1-of-n honest committee; wraps BTC UTXOs (incl. Ordinals) as Cardano assets</td><td><Badge kind="coming" label="Demo only" /> mainnet demo May 2025; no production liquidity found</td></tr>
+        <tr><td><strong>Pogun</strong> (IO-backed)</td><td>Non-margin, oracle-free credit market + a BitVM bridge using recursive proofs over Mithril certificates. "Trust-minimised, not trustless"</td><td><Badge kind="coming" /> missed its Q2 target; new target ≈ mid-Dec 2026</td></tr>
+        <tr><td><strong>Bifrost</strong> (FluidTokens, Lantr, zkFold)</td><td>Cardano SPOs collectively control the BTC threshold key; mints fBTC</td><td><Badge kind="coming" label="Testnet" /> on BTC testnet since 2026-04-16</td></tr>
+        <tr><td><strong>BitcoinOS Grail</strong></td><td>ZK (BitSNARK) bridge</td><td><Badge kind="unverified" /> demo transfer only</td></tr>
+        <tr><td><strong>Rosen Bridge</strong></td><td>Watchers + guard federation secured via Ergo</td><td><Badge kind="live" /> small ($0.32M on Cardano)</td></tr>
+        <tr><td><strong>Wanchain</strong></td><td>Storeman MPC federation</td><td><Badge kind="live" /> small ($0.76M)</td></tr>
+        <tr><td><strong>Indigo iBTC</strong></td><td>Synthetic: ADA-collateralised CDP tracking BTC price. No BTC backing</td><td><Badge kind="live" /> since 2022</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <Callout kind="honest">
+      <p><strong>No trust-minimised BTC bridge is in production on Cardano today.</strong> Real BTC liquidity is in the low single-digit millions at most. Today's BTC exposure is synthetic (iBTC) or federated.</p>
+      <p><strong>What you can do:</strong> build BTC-ready credit and yield products against iBTC / fBTC interfaces now, so they plug in when Bifrost or Pogun reaches mainnet. Show the trust model honestly in your UI.</p>
+    </Callout>
+    <p><strong>UX primitives that already work:</strong></p>
+    <ul>
+      <li><strong>FluidTokens BTC/ETH-key accounts:</strong> Aiken contracts let a Bitcoin or Ethereum wallet (Xverse, Unisat, Leather, MetaMask) control a Cardano address through ECDSA signature checks. A third party submits the transaction for a small ADA tip. Live mainnet demo. It is the closest thing Cardano has to account abstraction for non-Cardano users.</li>
+      <li><strong>Aquarium</strong> (FluidTokens): dApps fund "fee tanks" so users can pay fees in any native token. Protocol-level Babel fees are funded and on IO's roadmap.</li>
+    </ul>
+  </div>
+
+  <h2>Interop and bridges</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Rail</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>USDCx (Circle xReserve)</td><td><Badge kind="live" /></td><td>Ethereum USDC ↔ Cardano USDCx. Bridge-and-swap into any native token via Minswap.</td></tr>
+        <tr><td>LayerZero v2</td><td><Badge kind="coming" label="Phased" /></td><td>Goal: any asset deployable on Cardano by end-2026. eUTxO forced a redesign of the standard endpoint patterns.</td></tr>
+        <tr><td>Wormhole</td><td><Badge kind="gap" label="Proposal only" /></td><td>Forum discussion of a $5M ask; no on-chain governance action.</td></tr>
+        <tr><td>IBC (Cosmos)</td><td><Badge kind="coming" label="Testnet" /></td><td>Cardano Preprod ↔ Injective testnet since August 2026.</td></tr>
+        <tr><td>Milkomeda C1 (EVM sidechain)</td><td><Badge kind="closed" label="Shut down" /></td><td>There is no Solidity execution environment on Cardano.</td></tr>
+        <tr><td>Wanchain, Rosen, ChainPort, NEAR Intents</td><td><Badge kind="live" /></td><td>All small. NEAR Intents gives intent-based cross-chain swaps including ADA.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Open components you can compose with</h2>
+  <p class="prose">On Cardano, composition happens at the transaction level: one transaction can spend from, mint with and read from many protocols' scripts. These are the pieces with public code or APIs.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Component</th><th>What you get</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://github.com/minswap/sdk" target="_blank" rel="noopener">Minswap SDK</a></td><td>Pool prices, trade impact, order building, syncer. AMM V1/V2, Stableswap. V2 on Preprod.</td></tr>
+        <tr><td><a href="https://github.com/SundaeSwap-finance/sundae-sdk" target="_blank" rel="noopener">SundaeSwap SDK</a> + contracts</td><td>V3 contracts, SDK, Preview-network app.</td></tr>
+        <tr><td><a href="https://github.com/splashprotocol/splash-core" target="_blank" rel="noopener">Splash</a></td><td>Core contracts, protocol SDK, open off-chain executor agents.</td></tr>
+        <tr><td><a href="https://github.com/IndigoProtocol" target="_blank" rel="noopener">Indigo</a></td><td><code>indigo-sdk</code>, the <code>dexter</code> multi-DEX swap library, and <code>cardano-mcp</code> for AI agents.</td></tr>
+        <tr><td><a href="https://github.com/strike-finance" target="_blank" rel="noopener">Strike Finance</a></td><td>Perps, options and forwards contracts; Hummingbot connector; builder reference.</td></tr>
+        <tr><td><a href="https://dexhunter.gitbook.io/dexhunter-partners/api-reference/api" target="_blank" rel="noopener">DexHunter API</a></td><td>Aggregated swaps, limit orders, DCA; partner revenue share.</td></tr>
+        <tr><td><a href="https://github.com/FluidTokens" target="_blank" rel="noopener">FluidTokens</a></td><td>Loans v4, Aquarium fee abstraction, BTC/ETH-key accounts, CIP-113 programmable tokens, Bifrost.</td></tr>
+        <tr><td>Oracles</td><td><a href="https://github.com/pyth-network/pyth-lazer-cardano" target="_blank" rel="noopener">Pyth Lazer</a> (Aiken + TS), <a href="https://github.com/Charli3-Official/charli3-pull-oracle-client" target="_blank" rel="noopener">Charli3 pull client</a>, <a href="https://github.com/orcfax/cer-feeds" target="_blank" rel="noopener">Orcfax feeds</a>.</td></tr>
+        <tr><td><a href="https://defikernel.org" target="_blank" rel="noopener">DeFi Kernel</a></td><td>Open standard for batcher-less orders: permissionless fills, published datum/redeemer schemas, CIP-89 discovery.</td></tr>
+        <tr><td><a href="https://github.com/Anastasia-Labs/aiken-design-patterns" target="_blank" rel="noopener">Aiken design patterns</a></td><td>Withdraw-zero forwarding, UTxO indexers, merkelised validators.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>eUTxO DeFi design patterns</h2>
+  <div class="prose">
+    <p>What EVM developers need to unlearn. (The concurrency basics are on <a href="/mental-model">Mental model</a>.)</p>
+    <ol>
+      <li><strong>Order UTxO + batcher.</strong> Users lock order UTxOs; an off-chain batcher fills many against the pool in one transaction, and validators enforce a fair fill or refund. It works, but every DEX runs its own batcher, which is why PRIME wants a common standard.</li>
+      <li><strong>Order books on L1.</strong> Each order is its own UTxO, so fills are parallel. Needs good indexing and discovery (beacon tokens, CIP-89).</li>
+      <li><strong>Intents without batchers.</strong> Anyone fills any order directly (DeFi Kernel). The missing piece is the solver network itself.</li>
+      <li><strong>Pull oracles via reference inputs.</strong> Pyth verifies signed updates in a withdraw-zero script; your contract reads it and must enforce freshness.</li>
+      <li><strong>L2 for latency-sensitive trading.</strong> Hydra heads suit order matching, but carry operating and funding risk (DeltaDeFi paused).</li>
+      <li><strong>Fee and UX abstraction.</strong> Fee tanks today; protocol Babel fees and nested transactions arrive with Dijkstra.</li>
+    </ol>
+  </div>
+
+  <h2 id="gap-map">Primitive gap map</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Primitive</th><th>Ethereum / Solana</th><th>Cardano today</th><th>Gap</th></tr></thead>
+      <tbody>
+        <tr><td>Spot AMM</td><td>Uniswap v3/v4, Orca, Meteora</td><td>Constant product + stableswap; partial concentrated liquidity</td><td>Concentrated liquidity + ALM vaults</td></tr>
+        <tr><td>Money markets</td><td>Aave, Morpho, Kamino</td><td>Liqwid, Surf, FluidTokens P2P</td><td>Curated vaults, a 4626-like standard</td></tr>
+        <tr><td>Perps</td><td>Hyperliquid, dYdX, Drift</td><td>Strike (≈$2M TVL)</td><td>Depth, market makers, oracle redundancy</td></tr>
+        <tr><td>Stablecoins</td><td>USDT, USDC, USDe</td><td>USDCx, USDM, USDA, DJED, iUSD, USDr (new)</td><td>No native USDT, no yield-bearing delta-neutral stable</td></tr>
+        <tr><td>BTCfi</td><td>WBTC, cbBTC, tBTC, Babylon</td><td>iBTC (synthetic), small federated bridges</td><td>Production trust-minimised BTC</td></tr>
+        <tr><td>Liquid staking</td><td>Lido, Jito</td><td>Staking is natively liquid, but ADA locked in contracts often loses rewards</td><td>Staking-aware DeFi primitives</td></tr>
+        <tr><td>Intents / solvers</td><td>UniswapX, CoW, Jupiter</td><td>Per-DEX batchers, DeFi Kernel, NEAR Intents</td><td>Shared solver network</td></tr>
+        <tr><td>Wallet UX / AA</td><td>ERC-4337, 7702, passkeys</td><td>Native multisig; BTC/ETH-key accounts; fee tanks</td><td>Dual-stack wallet, fee abstraction at scale</td></tr>
+        <tr><td>Prediction markets</td><td>Polymarket</td><td>Bodega (≈$0)</td><td>Wide open</td></tr>
+        <tr><td>Analytics</td><td>Dune, Allium</td><td>Dune live; TapTools wound down in June</td><td>DeFi dashboards, on-chain attribution</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose">Each of these is written up as a buildable project on the <a href="/gaps">Gaps</a> page.</p>
+
+  <h2>Things to try on testnet</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>What</th><th>Network</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Test ADA</td><td>Preprod / Preview</td><td><a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noopener">Official faucet</a>: 10,000 tADA per day</td></tr>
+        <tr><td>Minswap V2 swaps / LP + SDK</td><td>Preprod</td><td><a href="https://testnet-preprod.minswap.org" target="_blank" rel="noopener">testnet-preprod.minswap.org</a> with <code>minswap/sdk</code></td></tr>
+        <tr><td>SundaeSwap</td><td>Preview</td><td><a href="https://app.preview.sundae.fi" target="_blank" rel="noopener">app.preview.sundae.fi</a> with <code>sundae-sdk</code></td></tr>
+        <tr><td>Pyth Pro price updates</td><td>Preprod</td><td>Pyth's Cardano example; needs a Lazer access token</td></tr>
+        <tr><td>Charli3 pull oracle</td><td>Preprod + mainnet</td><td><code>charli3-pull-oracle-client</code></td></tr>
+        <tr><td>Bifrost BTC bridge (fBTC)</td><td>BTC testnet ↔ Cardano testnet</td><td><code>FluidTokens/ft-bifrost-bridge</code></td></tr>
+        <tr><td>Cardano ↔ Injective IBC</td><td>Preprod ↔ Injective testnet</td><td><code>cardano-ibc-incubator</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <Sources items={sources} />
+    <NextPrev prev={{ href: "/stack", label: "The stack" }} next={{ href: "/frontiers/ai-agents", label: "AI agents" }} />
+  </div>
+</Layout>
+
+<style>
+  .stats { margin-bottom: 1.5rem; }
+  .rfp { margin: 1.2rem 0 0.5rem; }
+  .rfp ol, .rfp ul { padding-left: 1.2rem; font-size: .94rem; margin: 0; }
+  .table-wrap th[scope], tbody th { white-space: normal; width: 9rem; text-transform: none; font-size: .85rem; letter-spacing: 0; }
+</style>

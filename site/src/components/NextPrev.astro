@@ -1,0 +1,14 @@
+---
+interface Link { href: string; label: string }
+interface Props { prev?: Link; next?: Link }
+const { prev, next } = Astro.props;
+---
+<nav class="np" aria-label="Pagination">
+  {prev ? <a class="card" href={prev.href}><span class="muted small">← Previous</span><br />{prev.label}</a> : <span />}
+  {next && <a class="card right" href={next.href}><span class="muted small">Next →</span><br />{next.label}</a>}
+</nav>
+<style>
+  .np { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; max-width: var(--prose); }
+  .np .card { font-weight: 500; }
+  .right { text-align: right; }
+</style>

@@ -1,0 +1,16 @@
+---
+interface Props { label: string; value: string; sub?: string; id?: string }
+const { label, value, sub, id } = Astro.props;
+---
+<div class="stat card">
+  <p class="label">{label}</p>
+  <p class="value" id={id}>{value}</p>
+  {sub && <p class="sub">{sub}</p>}
+  <slot />
+</div>
+<style>
+  .stat { padding: 1rem 1.1rem; }
+  .label { margin: 0; font-size: .82rem; color: var(--ink-2); }
+  .value { margin: .15rem 0 .1rem; font-size: 1.65rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+  .sub { margin: 0; font-size: .8rem; color: var(--muted); line-height: 1.45; }
+</style>
