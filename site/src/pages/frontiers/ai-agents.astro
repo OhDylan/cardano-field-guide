@@ -1,0 +1,314 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FrontierTabs from "../../components/FrontierTabs.astro";
+import LiveFourWay from "../../components/LiveFourWay.astro";
+import Badge from "../../components/Badge.astro";
+import Callout from "../../components/Callout.astro";
+import Sources from "../../components/Sources.astro";
+import NextPrev from "../../components/NextPrev.astro";
+
+const agentCode = `from masumi import run
+
+async def process_job(identifier_from_purchaser: str, input_data: dict):
+    # call your LLM, CrewAI crew or LangGraph graph here
+    return input_data.get("text", "").upper()   # return a string
+
+INPUT_SCHEMA = {"input_data": [{"id": "text", "type": "string", "name": "Text"}]}
+
+if __name__ == "__main__":
+    run(start_job_handler=process_job, input_schema_handler=INPUT_SCHEMA)
+    # env: PAYMENT_API_KEY, SELLER_VKEY, AGENT_IDENTIFIER,
+    #      PAYMENT_SERVICE_URL, NETWORK=Preprod`;
+
+const nodeCode = `git clone https://github.com/masumi-network/masumi-services-dev-quickstart.git
+cd masumi-services-dev-quickstart && cp .env.example .env
+# set ADMIN_KEY (>=15 chars), ENCRYPTION_KEY (>=20 chars),
+#     BLOCKFROST_API_KEY_PREPROD
+docker compose up -d
+# Registry   -> http://localhost:3000/docs
+# Payments   -> http://localhost:3001/docs
+# Admin UI   -> http://localhost:3001/admin`;
+
+const initCode = `python3 -m venv venv && source venv/bin/activate
+pip install masumi && masumi init
+masumi check   # validates your .env against the node
+masumi run     # FastAPI server with all MIP-003 endpoints on :8080/docs`;
+
+const x402Code = `npm i @x402/cardano
+# or try the live demo: https://www.masumi.network/vending-machine`;
+
+const mcpCode = `# Wallet-aware Cardano MCP (Indigo)
+npx @indigoprotocol/cardano-mcp setup
+
+# Cardano Foundation skills for Claude Code
+/plugin marketplace add cardano-foundation/cardano-dev-skills`;
+
+const sources = [
+  { label: "Masumi — homepage and developer hub", url: "https://www.masumi.network/dev" },
+  { label: "Masumi docs index (llms.txt)", url: "https://www.masumi.network/dev/llms.txt" },
+  { label: "Masumi — tokens", url: "https://www.masumi.network/dev/masumi/core-concepts/tokens" },
+  { label: "Masumi — transaction fees", url: "https://www.masumi.network/dev/masumi/core-concepts/transaction-fees" },
+  { label: "Masumi — x402", url: "https://www.masumi.network/dev/masumi/core-concepts/x402" },
+  { label: "Masumi dev quickstart (Docker)", url: "https://github.com/masumi-network/masumi-services-dev-quickstart" },
+  { label: "masumi on PyPI", url: "https://pypi.org/project/masumi/" },
+  { label: "Kodosumi runtime", url: "https://github.com/masumi-network/kodosumi" },
+  { label: "NMKR × Masumi (2025 traction figures)", url: "https://www.nmkr.io/clients/nmkr-x-masumi" },
+  { label: "Catalyst F14 — Masumi AI Agent Network 2.0", url: "https://projectcatalyst.io/funds/14/cardano-use-cases-partners-and-products/masumi-ai-agent-network-20-by-serviceplan-group" },
+  { label: "Cardano Foundation — Masumi case study", url: "https://cardanofoundation.org/case-studies/masumi" },
+  { label: "x402 — Cardano exact scheme spec", url: "https://github.com/x402-foundation/x402/blob/main/specs/schemes/exact/scheme_exact_cardano.md" },
+  { label: "Cardano Foundation — x402 facilitator", url: "https://github.com/cardano-foundation/cardano-x402-facilitator" },
+  { label: "Crypto Briefing — x402 SDK on Cardano", url: "https://cryptobriefing.com/cardano-x402-sdk-ada-api-payments/" },
+  { label: "Crypto Daily — Cardano joins the x402 kit", url: "https://cryptodaily.co.uk/2026/09/cardano-joins-x402-kit-ai-agent-payments" },
+  { label: "Indigo cardano-mcp", url: "https://glama.ai/mcp/servers/IndigoProtocol/cardano-mcp" },
+  { label: "Mesh — AI tools", url: "https://meshjs.dev/ai" },
+  { label: "Cardano developer portal — AI-assisted development", url: "https://developers.cardano.org/docs/developers/curriculum/start-building/ai-assisted-development/" },
+  { label: "Cardano developer portal — AI agents curriculum", url: "https://developers.cardano.org/docs/developers/curriculum/dapps/ai-agents/overview" },
+  { label: "Sokosumi MCP", url: "https://www.masumi.network/dev/sokosumi/mcp" },
+  { label: "Intersect DevEx — production-grade Cardano MCP session", url: "https://devex.intersectmbo.org/docs/working-group/q2-2026/sessions/18-cardano-mcp-server/session-notes" },
+];
+---
+<Layout title="AI agents & agent payments" description="How AI agents get paid on Cardano: Masumi escrow and registry, x402 per-request payments, MCP servers and coding-agent skills, with a Preprod walkthrough.">
+  <FrontierTabs />
+  <PageHeader eyebrow="Frontier · AI agents" title="AI agents & agent payments" lede="Cardano's AI-agent bet is not agent tokens. It is payments, identity and accountability: an escrow contract that releases funds only when an agent commits a hash of its output, a public agent registry, and HTTP 402 per-request payments. Most of it is live on mainnet and Preprod today." />
+
+  <LiveFourWay>
+    <ul slot="live">
+      <li><strong>Masumi</strong> escrow + registry contracts on mainnet and Preprod</li>
+      <li>Python SDK <code>masumi</code> 1.2.0, Kodosumi runtime, Sokosumi marketplace</li>
+      <li>x402 "exact" scheme for Cardano merged; <code>@x402/cardano</code> on npm</li>
+      <li>MCP servers (Indigo, Masumi, Sokosumi, Mesh) and Cardano Foundation dev skills</li>
+    </ul>
+    <ul slot="coming">
+      <li>x402 facilitator on mainnet (proven on Preprod only)</li>
+      <li>Masumi L2 for cheap micropayments (milestone ≈50% done)</li>
+      <li><code>$SUMI</code> governance token (not launched)</li>
+      <li>Intersect "production-grade Cardano MCP" effort</li>
+    </ul>
+    <ul slot="gaps">
+      <li><strong>Agent wallets with spending policies</strong>: no Cardano standard exists</li>
+      <li>Typed TypeScript agent SDK for Masumi <Badge kind="unverified" /></li>
+      <li>Usage and reputation analytics for registered agents</li>
+      <li>Agent-to-agent subcontracting templates</li>
+    </ul>
+    <ul slot="try">
+      <li>Run a Masumi node with Docker and register a tUSDM-priced agent on Preprod</li>
+      <li>Hire an agent from Claude via the Masumi or Sokosumi MCP</li>
+      <li>Pay per request with the x402 vending-machine demo</li>
+    </ul>
+  </LiveFourWay>
+
+  <h2>Masumi: payments, identity and a registry for agents</h2>
+  <div class="prose">
+    <p><strong>Masumi</strong> was co-founded by <strong>NMKR</strong> (Cardano NFT and payments infrastructure) and <strong>Serviceplan Group</strong> (a European marketing group) and launched in November 2024. It is closer to "Stripe plus escrow plus a registry, for agents" than to a token launchpad, and it targets enterprises and EU compliance (MiCA, GDPR, AI Act). It is framework-agnostic: templates exist for CrewAI, AutoGen, LangGraph/LangChain, Agno, n8n and MCP. A Catalyst Fund 14 grant (900k ADA requested) funds version 2.0.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Component</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Payment service</strong> (Masumi node)</td><td>TypeScript + Postgres. Manages Purchasing, Selling and Collection wallets, builds escrow transactions, exposes a REST API and an admin UI.</td></tr>
+        <tr><td><strong>Registry service</strong></td><td>Indexes on-chain agent registrations; search and discovery by capability. A central instance runs at registry.masumi.network.</td></tr>
+        <tr><td><strong>Registry contract</strong></td><td>Each agent is an NFT minted on Cardano with MIP-002 metadata. Updating means deregister (burn) and register again.</td></tr>
+        <tr><td><strong>Escrow contract</strong></td><td>Buyer locks funds; seller submits a result hash; a dispute window runs; then payout or refund.</td></tr>
+        <tr><td><strong>Decision logging</strong> (MIP-004)</td><td>SHA-256 hash of input and output written on-chain. Required to unlock payment, and the evidence in a dispute. Only hashes go on-chain.</td></tr>
+        <tr><td><strong>MIP-003</strong> Agentic Service API</td><td><code>/start_job</code>, <code>/status</code>, <code>/availability</code>, <code>/input_schema</code>, plus <code>/provide_input</code> for human-in-the-loop.</td></tr>
+        <tr><td><strong>Kodosumi</strong></td><td>Open-source Python runtime on Ray Serve for running agent workflows at scale.</td></tr>
+        <tr><td><strong>Sokosumi</strong></td><td>"Fiverr for AI agents" marketplace with web2 UX. Preprod gallery; mainnet listing requires whitelisting.</td></tr>
+        <tr><td><strong>Masumi as a Service</strong></td><td>Hosted dashboard at app.masumi.network: register agents without running a node.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="escrow">Try the escrow lifecycle</h3>
+  <p class="prose">A simplified model of what the Masumi escrow contract enforces. Step through it, then try tampering with the output.</p>
+  <div class="escrow card" id="escrow-sim">
+    <ol class="steps" aria-label="Escrow states">
+      <li data-s="0">Funds locked</li>
+      <li data-s="1">Result submitted</li>
+      <li data-s="2">Dispute window</li>
+      <li data-s="3">Completed / Refunded</li>
+    </ol>
+    <div class="ledger" aria-live="polite">
+      <p class="state-line"><span class="k">state</span> <code id="es-state">FundsLocked</code></p>
+      <p class="state-line"><span class="k">escrow</span> <code id="es-escrow">10 tUSDM locked</code></p>
+      <p class="state-line"><span class="k">on-chain hash</span> <code id="es-hash">—</code></p>
+      <p class="state-line"><span class="k">delivered output</span> <code id="es-out">—</code></p>
+      <p id="es-msg" class="msg">The buyer has locked 10 tUSDM in the escrow contract and the agent has started work.</p>
+    </div>
+    <div class="controls">
+      <button class="btn primary" type="button" id="es-next">Agent submits result</button>
+      <button class="btn" type="button" id="es-tamper" disabled>Tamper with output</button>
+      <button class="btn" type="button" id="es-reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <h3>Fees and tokens</h3>
+    <ul>
+      <li>Masumi charges a <strong>5% network fee</strong> on the selling price, paid in the active stablecoin. Cardano transaction fees (in ADA) apply to locking, submitting, collecting and registering.</li>
+      <li>On L1, very small payments are uneconomic. The planned Masumi L2 is meant to fix that.</li>
+    </ul>
+    <Callout kind="warn" title="The docs disagree on the stablecoin">
+      <p>Masumi's current Tokens page says mainnet uses <strong>USDCx</strong> and Preprod uses <strong>tUSDM</strong>. The registration and Sokosumi pages still say to price in <strong>USDM</strong>. Use tUSDM on Preprod, and re-check the Tokens page before you go to mainnet.</p>
+    </Callout>
+    <h3>Traction</h3>
+    <p>The only published figures cover January–October 2025 (NMKR): 16,900+ transactions across mainnet and testnet, <strong>$23k+ verified mainnet volume</strong>, 250+ agents on Sokosumi, 4,461 jobs, and BMW and Generali named as enterprise users. No 2026 figures are public <Badge kind="unverified" />. Honest read: the infrastructure is real, and the volume is still small.</p>
+  </div>
+
+  <h2>Two payment rails: MIP-003 escrow vs x402</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>MIP-003 (Masumi escrow)</th><th>x402 (HTTP 402)</th></tr></thead>
+      <tbody>
+        <tr><th>Flow</th><td><code>start_job</code> → lock funds → agent works → result hash on-chain → dispute window → payout</td><td>Client calls the API → gets <code>402</code> with payment requirements → retries with a signed Cardano transaction in the <code>PAYMENT-SIGNATURE</code> header → server or facilitator verifies and broadcasts</td></tr>
+        <tr><th>Refunds</th><td>Yes, plus disputes</td><td>No (≈20 s settlement, final), unless you use the <code>masumi</code> transfer method that routes through escrow</td></tr>
+        <tr><th>Best for</th><td>High-value jobs where the buyer needs assurance</td><td>Metered API calls and micropayments</td></tr>
+        <tr><th>Assets</th><td>Stablecoin (see warning above)</td><td>ADA or any single native token; UTxO nonce as replay guard</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <p><strong>x402 on Cardano status:</strong> the Cardano "exact" scheme is merged into the x402 spec with network IDs <code>cardano:mainnet</code>, <code>cardano:preprod</code> and <code>cardano:preview</code>. <code>@x402/cardano</code> (v2.28.0) has been on npm since late September 2026. The Cardano Foundation's Java facilitator supports default, masumi and script transfer methods, but <strong>has only been proven on Preprod</strong> <Badge kind="coming" label="Mainnet pending" />.</p>
+    <pre><code>{x402Code}</code></pre>
+  </div>
+
+  <h2>Other agent infrastructure</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>What</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Indigo <code>cardano-mcp</code></strong></td><td>Wallet-aware MCP server: addresses, UTxOs, balances, ADA Handles, staking, submitting signed transactions.</td></tr>
+        <tr><td><strong>Masumi MCP server</strong></td><td>Lets Claude Desktop and similar clients list, hire and monitor Masumi agents. Needs your own node.</td></tr>
+        <tr><td><strong>Sokosumi MCP</strong></td><td>Hosted (OAuth) at <code>mcp.sokosumi.com/mcp</code>: browse agents, create jobs, check credits.</td></tr>
+        <tr><td><strong>Cardano Foundation <code>cardano-dev-skills</code></strong></td><td>Skill pack for Claude Code and Codex (write-validator, build-transaction, explain-eutxo, setup-devnet…), docs refreshed weekly.</td></tr>
+        <tr><td><strong>Mesh AI tools</strong></td><td>Mesh MCP, agent skills, <code>llms.txt</code>.</td></tr>
+        <tr><td><strong>Midnight</strong></td><td>Kapa MCP and the Midnight Expert plugin (see <a href="/frontiers/midnight">Midnight</a>).</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <pre><code>{mcpCode}</code></pre>
+    <Callout kind="honest" title="Gap: agent wallets">
+      <p>There is no Cardano standard for an "agent wallet with a spending policy" (daily limits, allow-listed counterparties, revocable session keys). Today agents either use the Masumi node's hot wallets or plain SDK wallets. The official curriculum's advice is "the agent proposes and you sign", and to treat any MCP server that can move funds as custodial.</p>
+      <p><strong>What you can do:</strong> native scripts and Aiken validators can already express spend limits and time locks. A well-designed agent-wallet CIP plus a reference implementation would fill a real hole. See <a href="/gaps">Gaps</a>.</p>
+    </Callout>
+    <p>No significant Olas- or Virtuals-style tokenised-agent launchpad exists on Cardano <Badge kind="unverified" />. The ecosystem chose payments and accountability infrastructure instead.</p>
+  </div>
+
+  <h2 id="walkthrough">A paid agent on Preprod in an afternoon</h2>
+  <div class="prose">
+    <p>Prerequisites: Docker, Python 3.10+, a free Blockfrost <strong>Preprod</strong> key, and ngrok (or any public host) if the agent and node run on different machines. Prefer not to self-host? Use app.masumi.network instead of steps 1–2.</p>
+    <ol class="walk">
+      <li><strong>Run a Masumi node locally.</strong>
+        <pre><code>{nodeCode}</code></pre></li>
+      <li><strong>Back up the generated wallet mnemonics</strong> from the admin UI, then fund the Selling and Purchasing wallets with test ADA from the <a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noopener">Preprod faucet</a>.</li>
+      <li><strong>Create the agent.</strong>
+        <pre><code>{initCode}</code></pre>
+        Then edit <code>process_job</code>:
+        <pre><code>{agentCode}</code></pre></li>
+      <li><strong>Configure <code>.env</code>:</strong> <code>PAYMENT_API_KEY</code> from Admin → API Keys, <code>SELLER_VKEY</code> from Admin → Wallets → Selling wallet, <code>NETWORK=Preprod</code>, <code>PAYMENT_SERVICE_URL=http://localhost:3001/api/v1</code>.</li>
+      <li><strong>Register it</strong> in Admin → AI Agents → Register. Set the price in <strong>tUSDM</strong>. This mints the registry NFT; wait 5–15 minutes, then copy the <code>agentIdentifier</code> into <code>AGENT_IDENTIFIER</code> and restart.</li>
+      <li><strong>Verify</strong> at <code>preprod.sokosumi.com/agents</code>, where tUSDM-priced Preprod agents appear automatically.</li>
+      <li><strong>Test a purchase end to end:</strong> <code>POST /start_job</code> on the agent, <code>POST /purchase</code> on the node with the input hash, poll until <code>FundsLocked</code> then <code>ResultSubmitted</code>, read the result from <code>GET /status</code>. Or hire it from Claude through the Masumi MCP.</li>
+      <li><strong>Optional:</strong> add an x402 endpoint with <code>@x402/cardano</code> for per-call pricing.</li>
+    </ol>
+    <Callout kind="tip" title="Going to mainnet">
+      <p>Run a separate node, fund the wallets with ADA plus the stablecoin listed on the Tokens page, and submit Sokosumi's whitelisting form.</p>
+    </Callout>
+
+    <Sources items={sources} />
+    <NextPrev prev={{ href: "/frontiers/defi", label: "DeFi & Bitcoin DeFi" }} next={{ href: "/frontiers/midnight", label: "Midnight (privacy)" }} />
+  </div>
+</Layout>
+
+<style>
+  tbody th { white-space: normal; text-transform: none; letter-spacing: 0; font-size: .85rem; width: 7rem; }
+  .escrow { max-width: var(--prose); margin: 0 0 2rem; }
+  .steps { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; counter-reset: s; }
+  @media (min-width: 640px) { .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .steps li { counter-increment: s; font-size: .8rem; padding: .45rem .55rem; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); margin: 0; }
+  .steps li::before { content: counter(s) " "; font-family: var(--font-mono); }
+  .steps li.done { color: var(--ink-2); border-color: var(--line-strong); }
+  .steps li.now { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-soft); }
+  .steps li.bad { color: var(--gap); border-color: var(--gap); background: var(--gap-bg); }
+  .ledger { background: var(--surface-2); border-radius: 8px; padding: .8rem .9rem; margin-bottom: 1rem; }
+  .state-line { margin: 0 0 .25rem; font-size: .85rem; display: flex; gap: .6rem; flex-wrap: wrap; }
+  .state-line .k { color: var(--muted); font-family: var(--font-mono); min-width: 8.5rem; font-size: .78rem; }
+  .state-line code { overflow-wrap: anywhere; }
+  .msg { margin: .6rem 0 0; font-size: .92rem; }
+  .msg.bad { color: var(--gap); }
+  .msg.good { color: var(--live); }
+  .controls { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .walk > li { margin-bottom: 1rem; }
+  .walk pre { margin-top: .6rem; }
+</style>
+
+<script>
+  const root = document.getElementById("escrow-sim");
+  if (root) {
+    const $ = (id: string) => document.getElementById(id) as HTMLElement;
+    const steps = Array.from(root.querySelectorAll<HTMLLIElement>(".steps li"));
+    const next = $("es-next") as HTMLButtonElement;
+    const tamper = $("es-tamper") as HTMLButtonElement;
+    const OUTPUT = "SUMMARY: Q3 revenue up 12%";
+    const fakeHash = (s: string) => {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+      return "0x" + h.toString(16).padStart(8, "0") + "… (illustrative)";
+    };
+    let step = 0;
+    let tampered = false;
+
+    function paint() {
+      steps.forEach((li, i) => {
+        li.className = i < step ? "done" : i === step ? (tampered && step >= 2 ? "bad" : "now") : "";
+      });
+      const msg = $("es-msg");
+      msg.className = "msg";
+      const committed = fakeHash(OUTPUT);
+      const delivered = tampered ? "SUMMARY: Q3 revenue up 21%" : OUTPUT;
+      $("es-hash").textContent = step >= 1 ? committed : "—";
+      $("es-out").textContent = step >= 1 ? delivered : "—";
+      tamper.disabled = !(step === 1 || step === 2) || tampered;
+      if (step === 0) {
+        $("es-state").textContent = "FundsLocked";
+        $("es-escrow").textContent = "10 tUSDM locked";
+        msg.textContent = "The buyer has locked 10 tUSDM in the escrow contract and the agent has started work.";
+        next.textContent = "Agent submits result";
+        next.disabled = false;
+      } else if (step === 1) {
+        $("es-state").textContent = "ResultSubmitted";
+        msg.textContent = "The agent wrote the SHA-256 hash of its input and output on-chain (MIP-004). Funds stay locked until the dispute window passes.";
+        next.textContent = "Open dispute window";
+      } else if (step === 2) {
+        $("es-state").textContent = "ResultSubmitted (dispute window)";
+        if (tampered) {
+          msg.textContent = "Mismatch: the buyer hashes the output they received and it does not match the hash committed on-chain. The buyer can dispute and request a refund.";
+          msg.className = "msg bad";
+          next.textContent = "Resolve: refund buyer";
+        } else {
+          msg.textContent = "The buyer can check the delivered output against the on-chain hash. If nobody disputes before unlockTime, the seller can collect.";
+          next.textContent = "Pass unlockTime";
+        }
+      } else {
+        next.disabled = true;
+        if (tampered) {
+          $("es-state").textContent = "RefundRequested → Refunded";
+          $("es-escrow").textContent = "10 tUSDM returned to buyer";
+          msg.textContent = "Refunded. The on-chain hash is the evidence: what the agent delivered is not what it committed to.";
+          msg.className = "msg bad";
+        } else {
+          $("es-state").textContent = "Completed";
+          $("es-escrow").textContent = "9.5 tUSDM to seller · 0.5 tUSDM network fee (5%)";
+          msg.textContent = "Completed. The seller collected; the hash stays on-chain as an auditable decision log.";
+          msg.className = "msg good";
+        }
+      }
+    }
+    next.addEventListener("click", () => { if (step < 3) { step++; paint(); } });
+    tamper.addEventListener("click", () => { tampered = true; if (step < 2) step = 2; paint(); });
+    $("es-reset").addEventListener("click", () => { step = 0; tampered = false; paint(); });
+    paint();
+  }
+</script>

@@ -1,0 +1,138 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Callout from "../components/Callout.astro";
+
+const personas = [
+  { who: "Solidity / EVM developer", go: "/mental-model#rosetta-evm", hint: "ERC-20 → native assets, msg.sender → required signers, storage → datums." },
+  { who: "Solana / Anchor developer", go: "/mental-model#rosetta-anchor", hint: "Explicit accounts in, explicit outputs out: eUTxO will feel familiar." },
+  { who: "Web2 TypeScript developer", go: "/stack", hint: "Aiken for contracts, Mesh or Evolution SDK for everything else." },
+  { who: "Python developer", go: "/stack#languages", hint: "OpShin for contracts, PyCardano off-chain, Masumi's Python SDK for agents." },
+  { who: "AI / agent builder", go: "/frontiers/ai-agents", hint: "Charge per call with x402, or escrowed jobs with Masumi." },
+  { who: "Bitcoin developer", go: "/frontiers/defi#btcfi", hint: "Same UTXO mental model. BTC rails are early, which is the opportunity." },
+  { who: "ZK / privacy engineer", go: "/frontiers/midnight", hint: "Compact: a TypeScript-like language that compiles to ZK circuits." },
+  { who: "I just want to know who pays", go: "/funding", hint: "Every open grant, RFP, fund and retainer, with deadlines and odds." },
+];
+const edges = [
+  { t: "Know the fee before you submit", d: "Transactions are deterministic. Simulate locally, get the exact fee and result. If someone spent your input first, your transaction is rejected and costs nothing." },
+  { t: "Tokens without contracts", d: "Native assets are a ledger feature. Minting needs a policy; transfers need no code, so there is no token contract to write or exploit." },
+  { t: "A treasury that pays builders", d: "~1.37B ADA sits in an on-chain treasury. Anyone can propose a withdrawal; DReps vote. In 2026 it funded nodes, SDKs, tooling and a 120M ADA DeFi program." },
+  { t: "UTXO, like Bitcoin", d: "If you think in UTXOs, you already think like Bitcoin. Bitcoin DeFi rails are being built here, but none is in production yet." },
+  { t: "Privacy next door", d: "Midnight, a ZK partner chain, launched mainnet in March 2026. You write contracts in Compact and decide exactly what gets disclosed." },
+  { t: "Agent payments", d: "x402 now has an official Cardano package, and Masumi runs escrow and an agent registry on mainnet." },
+];
+const frontiers = [
+  { href: "/frontiers/defi", t: "DeFi & Bitcoin DeFi", d: "Small, shrinking, and now funded to grow. What's composable, and the gaps PRIME will pay for." },
+  { href: "/frontiers/ai-agents", t: "AI agents", d: "Masumi escrow and registry, x402, MCP servers, and how to ship a paid agent on Preprod in an afternoon." },
+  { href: "/frontiers/midnight", t: "Midnight", d: "A ZK privacy partner chain: Compact, NIGHT and DUST, and what's live and what isn't." },
+  { href: "/frontiers/governance", t: "Governance & treasury", d: "On-chain, programmable, and the main source of builder funding. Includes a threshold simulator." },
+  { href: "/frontiers/scaling", t: "Scaling & roadmap", d: "Hydra, Leios, Peras, nested transactions and Plutus V4, and when each one actually lands." },
+];
+---
+<Layout title="Build on Cardano, with the full picture" description="An independent, technical and honest field guide to building on Cardano in 2026: what's live, what's coming, what's missing, and who will pay you to build it.">
+  <section class="hero">
+    <p class="eyebrow">An independent field guide for builders · verified October 2026</p>
+    <h1>Build on Cardano,<br />with the full picture.</h1>
+    <p class="lede">What's live, what's coming, what's missing, and who will pay you to build it. Written for engineers coming from Ethereum, Solana, web2 and AI, by an ADA holder who is also a software engineer. We include the uncomfortable numbers.</p>
+    <div class="cta">
+      <a class="btn primary" href="/mental-model">Start with the mental model</a>
+      <a class="btn" href="/funding">See who's funding builders</a>
+    </div>
+  </section>
+
+  <section class="live" aria-labelledby="live-h">
+    <h2 id="live-h" class="sr">Live network numbers</h2>
+    <div class="strip">
+      <div><span class="k">Epoch</span><span class="v" data-live="epoch">660</span></div>
+      <div><span class="k">Treasury</span><span class="v" data-live="treasury">1.37B ADA</span></div>
+      <div><span class="k">DeFi TVL</span><span class="v" data-live="tvl">$73M</span></div>
+      <div><span class="k">ADA price</span><span class="v" data-live="price">$0.27</span></div>
+    </div>
+    <p class="stamp" data-live="stamp">Snapshot from 2026-10-07. Trying live data from Koios and DefiLlama…</p>
+  </section>
+
+  <section class="section">
+    <h2>The 30-second version</h2>
+    <div class="grid grid-3">
+      <div class="card"><h3>Genuinely good</h3><p>Deterministic transactions and fees. Native tokens. A modern contract language (Aiken) used by 75%+ of developers. An on-chain treasury that funds builders. New stablecoin, oracle and analytics rails in 2026.</p></div>
+      <div class="card"><h3>Genuinely hard</h3><p>Thin liquidity and users: $73M TVL, rank #36, with a real outflow since July. Fragmented tooling with no single "blessed path". The eUTxO model takes a week to click. Several well-known apps shut down in 2026.</p></div>
+      <div class="card"><h3>What that means for you</h3><p>Low competition, and whole categories are empty. Money is set aside for exactly the infrastructure that's missing. It's a small pond: you can become the default in your category, but you have to bring users with you. <a href="/state">See the numbers →</a></p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Pick your starting point</h2>
+    <div class="grid grid-2 personas">
+      {personas.map((p) => (
+        <a class="card" href={p.go}>
+          <h3>{p.who}</h3>
+          <p class="muted small">{p.hint}</p>
+          <span class="go">Go →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Where Cardano is credibly different</h2>
+    <p class="muted">Only claims that hold up for a sceptical senior engineer. No TPS hype, no commit-count rankings.</p>
+    <div class="grid grid-3">
+      {edges.map((e) => <div class="card"><h3>{e.t}</h3><p class="small">{e.d}</p></div>)}
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Frontiers</h2>
+    <p class="muted">Each one is split into what's live, what's coming, where the gaps are, and something you can try this week.</p>
+    <div class="grid grid-3">
+      {frontiers.map((f) => <a class="card" href={f.href}><h3>{f.t}</h3><p class="small muted">{f.d}</p><span class="go">Explore →</span></a>)}
+      <a class="card" href="/gaps"><h3>Gaps worth building</h3><p class="small muted">A concrete list of products Cardano lacks that one to three developers could build, with the funding that matches each.</p><span class="go">See the list →</span></a>
+    </div>
+  </section>
+
+  <section class="section prose">
+    <Callout kind="note" title="What this site is, and isn't">
+      <p>This is not the official documentation. For that, go to <a href="https://developers.cardano.org" rel="noopener">developers.cardano.org</a>, <a href="https://aiken-lang.org" rel="noopener">aiken-lang.org</a> and <a href="https://meshjs.dev" rel="noopener">meshjs.dev</a>. This site is the map around the docs: an honest picture of the ecosystem, where to start, and where the money and gaps are. It is independent and not affiliated with any Cardano entity.</p>
+      <p>Using a coding agent? Point it at <a href="/llms.txt">/llms.txt</a>.</p>
+    </Callout>
+  </section>
+</Layout>
+
+<style>
+  .hero { padding: 1rem 0 2rem; max-width: 52rem; }
+  .hero h1 { font-size: clamp(2.3rem, 6vw, 3.8rem); line-height: 1.08; margin-bottom: 1.2rem; }
+  .cta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.6rem; }
+  .live { margin: 1rem 0 0; }
+  .strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .strip > div { padding: .9rem 1.1rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; gap: .1rem; }
+  .strip > div:nth-child(2n) { border-right: 0; }
+  .strip > div:nth-child(n+3) { border-bottom: 0; }
+  @media (min-width: 720px) {
+    .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .strip > div { border-bottom: 0; border-right: 1px solid var(--line); }
+    .strip > div:nth-child(2n) { border-right: 1px solid var(--line); }
+    .strip > div:last-child { border-right: 0; }
+  }
+  .k { font-size: .8rem; color: var(--ink-2); }
+  .v { font-size: 1.45rem; font-weight: 600; letter-spacing: -0.02em; }
+  .live .stamp { margin-top: .5rem; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .personas h3 { font-size: 1.02rem; margin-bottom: .3rem; }
+  .personas p { margin-bottom: .5rem; }
+  .card h3 { font-size: 1.05rem; }
+  .section h2 { margin-top: 0; }
+</style>
+
+<script>
+  const set = (k: string, v: string) => { const e = document.querySelector(`[data-live="${k}"]`); if (e) e.textContent = v; };
+  const stamp = document.querySelector('[data-live="stamp"]');
+  let ok = 0;
+  const done = () => { if (stamp) stamp.textContent = ok ? `Live: ${ok} of 4 values fetched just now from Koios and DefiLlama. The rest are from the 2026-10-07 snapshot.` : "Live data unavailable. Showing the 2026-10-07 snapshot."; };
+  const get = (u: string) => fetch(u, { headers: { accept: "application/json" } }).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); });
+  Promise.allSettled([
+    get("https://api.koios.rest/api/v1/tip").then((d) => { set("epoch", String(d[0].epoch_no)); ok++; return d[0].epoch_no; })
+      .then((ep) => get(`https://api.koios.rest/api/v1/totals?_epoch_no=${ep}`))
+      .then((t) => { set("treasury", `${(Number(t[0].treasury) / 1e15).toFixed(3)}B ADA`); ok++; }),
+    get("https://api.llama.fi/v2/chains").then((cs) => { const c = cs.find((x: { name: string }) => x.name === "Cardano"); if (c) { set("tvl", `$${Math.round(c.tvl / 1e6)}M`); ok++; } }),
+    get("https://coins.llama.fi/prices/current/coingecko:cardano").then((p) => { set("price", `$${p.coins["coingecko:cardano"].price.toFixed(3)}`); ok++; }),
+  ]).then(done);
+</script>

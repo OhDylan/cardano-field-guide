@@ -1,0 +1,340 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Callout from "../components/Callout.astro";
+import Badge from "../components/Badge.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+
+const aikenCode = `use aiken/collection/list
+use aiken/crypto.{VerificationKeyHash}
+use cardano/transaction.{OutputReference, Transaction}
+
+pub type Datum {
+  owner: VerificationKeyHash,
+}
+
+pub type Redeemer {
+  msg: ByteArray,
+}
+
+validator hello_world {
+  spend(datum: Option<Datum>, redeemer: Redeemer, _own_ref: OutputReference, self: Transaction) {
+    expect Some(Datum { owner }) = datum
+    let must_say_hello = redeemer.msg == "Hello, World!"
+    let must_be_signed = list.has(self.extra_signatories, owner)
+    must_say_hello? && must_be_signed?
+  }
+
+  else(_) {
+    fail
+  }
+}`;
+
+const setupCode = `# 1. Toolchain (pick one installer)
+curl -sSfL https://install.aiken-lang.org | bash   # then: aikup
+# or: npm install -g @aiken-lang/aiken
+# or: brew install aiken-lang/tap/aiken
+
+# 2. New project, test, build
+aiken new me/hello && cd hello
+aiken check          # unit + property tests, no chain needed
+aiken build          # writes plutus.json (CIP-57 blueprint)`;
+
+const offchainCode = `// lock.ts — sketch with Mesh (see meshjs.dev for the full, current API)
+import { BlockfrostProvider, MeshTxBuilder, MeshWallet,
+         serializePlutusScript, deserializeAddress, mConStr0, applyCborEncoding } from "@meshsdk/core";
+import blueprint from "./plutus.json";
+
+const provider = new BlockfrostProvider(process.env.BLOCKFROST_PREVIEW_KEY!);
+const wallet = new MeshWallet({ networkId: 0, fetcher: provider, submitter: provider,
+  key: { type: "mnemonic", words: process.env.MNEMONIC!.split(" ") } });
+
+const code = applyCborEncoding(blueprint.validators[0].compiledCode);
+const { address: scriptAddr } = serializePlutusScript({ code, version: "V3" });
+const owner = deserializeAddress(await wallet.getChangeAddress()).pubKeyHash;
+
+const tx = new MeshTxBuilder({ fetcher: provider, submitter: provider });
+await tx.txOut(scriptAddr, [{ unit: "lovelace", quantity: "10000000" }])
+  .txOutInlineDatumValue(mConStr0([owner]))      // datum = { owner }
+  .changeAddress(await wallet.getChangeAddress())
+  .selectUtxosFrom(await wallet.getUtxos())
+  .complete();                                    // exact fee is known here
+console.log(await wallet.submitTx(await wallet.signTx(tx.txHex)));`;
+
+const aiCode = `# Cardano Foundation skills for Claude Code (18 skills, docs refreshed weekly)
+/plugin marketplace add cardano-foundation/cardano-dev-skills
+
+# Mesh: MCP server, agent skills and llms.txt
+# → https://meshjs.dev/ai
+
+# Midnight docs over MCP
+claude mcp add --transport http midnight https://midnight.mcp.kapa.ai`;
+
+const sources = [
+  { label: "Cardano Foundation 2025 developer survey (Aiken >75%)", url: "https://cardanofoundation.org/blog/2025-developer-ecosystem-survey-results" },
+  { label: "Aiken changelog (v1.1.24, 2026-09-26)", url: "https://github.com/aiken-lang/aiken/blob/main/CHANGELOG.md" },
+  { label: "Aiken Hello World", url: "https://aiken-lang.org/example--hello-world/basics" },
+  { label: "Aiken Playground", url: "https://play.aiken-lang.org" },
+  { label: "Intersect DevEx: smart contract languages session notes (Q1 2026)", url: "https://devex.intersectmbo.org/docs/working-group/q1-2026/sessions/13-smart-contracts-languages/session-notes" },
+  { label: "IOG: Plutus Tx gets a makeover, meet Plinth", url: "https://www.iog.io/news/plutus-tx-gets-a-makeover-meet-plinth" },
+  { label: "Scalus", url: "https://scalus.org" },
+  { label: "HarmonicLabs pebble (formerly plu-ts)", url: "https://github.com/HarmonicLabs/plu-ts" },
+  { label: "Marlowe (moved to marlowe-lang)", url: "https://marlowe-lang.org" },
+  { label: "Mesh SDK", url: "https://meshjs.dev" },
+  { label: "Evolution SDK (Intersect incubated)", url: "https://github.com/IntersectMBO/evolution-sdk" },
+  { label: "Lucid Evolution maintenance notice", url: "https://github.com/no-witness-labs/lucid-evolution" },
+  { label: "Blaze", url: "https://blaze.butane.dev" },
+  { label: "npm registry (versions and dates, queried 2026-10-07)", url: "https://registry.npmjs.org/@meshsdk/core" },
+  { label: "Blockfrost docs", url: "https://blockfrost.dev/start-building" },
+  { label: "Koios", url: "https://koios.rest" },
+  { label: "Dolos (TxPipe)", url: "https://github.com/txpipe/dolos" },
+  { label: "Ogmios changelog (v7.0.0)", url: "https://github.com/CardanoSolutions/ogmios/blob/master/CHANGELOG.md" },
+  { label: "Demeter.run", url: "https://demeter.run" },
+  { label: "Yaci DevKit", url: "https://devkit.yaci.xyz" },
+  { label: "UTxO RPC", url: "https://utxorpc.org" },
+  { label: "Tx3 (TxPipe)", url: "https://docs.txpipe.io/tx3" },
+  { label: "Testnet environments (Preview vs Preprod)", url: "https://docs.cardano.org/cardano-testnets/environments" },
+  { label: "Official testnet faucet", url: "https://docs.cardano.org/cardano-testnets/tools/faucet" },
+  { label: "SanchoNet", url: "https://sancho.network" },
+  { label: "cardano-dev-skills (Cardano Foundation)", url: "https://github.com/cardano-foundation/cardano-dev-skills" },
+  { label: "Mesh AI tools", url: "https://meshjs.dev/ai" },
+  { label: "IOG Developer Experience Initiative (2026-05-18)", url: "https://www.iog.io/news/developer-experience-initiative" },
+  { label: "Intersect DevEx FAQ (pain points)", url: "https://devex.intersectmbo.org/docs/faq" },
+  { label: "Intersect DevEx developer pathway resources", url: "https://devex.intersectmbo.org/docs/working-group/sessions/q1-2026/cardano-developer-pathway/session-resources" },
+  { label: "Developer portal review, issue #2008", url: "https://github.com/cardano-foundation/developer-portal/issues/2008" },
+];
+---
+<Layout title="The stack" description="The recommended 2026 Cardano toolchain: Aiken, Mesh or Evolution SDK, Blockfrost or Koios, Yaci DevKit and the Preview testnet, with honest notes on what's still rough.">
+  <PageHeader
+    eyebrow="03 · The stack"
+    title="One path through the toolchain"
+    lede="Cardano has too many tools and no single official 'start here'. Developers say so every year. This page picks one path for you, explains the alternatives, and is honest about what's still rough."
+  />
+
+  <div class="prose">
+    <h2 id="path">The recommended path (October 2026)</h2>
+  </div>
+
+  <div class="path wide">
+    <div class="step card"><p class="n mono">1 · Contracts</p><h3>Aiken</h3><p>Purpose-built language, Rust-like syntax, one binary with tests, benchmarks and an LSP. Used by more than 75% of surveyed devs.</p></div>
+    <div class="step card"><p class="n mono">2 · Off-chain</p><h3>Mesh <span class="muted">or</span> Evolution SDK</h3><p>TypeScript. Mesh for the gentlest start; Evolution SDK for strict typing and a long-term stack.</p></div>
+    <div class="step card"><p class="n mono">3 · Chain access</p><h3>Blockfrost <span class="muted">or</span> Koios</h3><p>Hosted REST. Blockfrost's free tier is ~50k requests a day; Koios works without a key for light use.</p></div>
+    <div class="step card"><p class="n mono">4 · Local chain</p><h3>Yaci DevKit</h3><p>One-command devnet with sub-second blocks and a Blockfrost-compatible API. Your Hardhat/Anvil.</p></div>
+    <div class="step card"><p class="n mono">5 · Testnet</p><h3>Preview</h3><p>1-day epochs, upgrades land here first. 10,000 test ADA per day from the faucet.</p></div>
+  </div>
+
+  <div class="prose">
+    <Callout kind="note" title="Why this path">
+      <p>
+        It's what most current docs, audits, templates and AI skills assume. The Cardano Foundation's own <code>cardano-dev-skills</code>
+        defaults to Aiken, and its scaffold skill uses Evolution SDK. Python, Scala and Haskell paths exist and are fine; they're listed below.
+      </p>
+    </Callout>
+
+    <h2 id="languages">On-chain languages</h2>
+    <p>Everything compiles to UPLC (Untyped Plutus Core). The chain doesn't care which language you used, so pick for your team.</p>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>Language</th><th>Syntax</th><th>Latest (checked 2026-10-07)</th><th>Status</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Aiken</strong></td><td>Rust / Gleam-like</td><td class="mono small">v1.1.24 (2026-09-26)</td><td><Badge kind="live" label="Default pick" /></td><td>Almost everyone</td></tr>
+        <tr><td><strong>Plinth</strong> (formerly Plutus Tx)</td><td>Haskell</td><td class="mono small">plutus 1.71.0.0</td><td><Badge kind="live" /></td><td>Haskell teams, high-assurance infrastructure</td></tr>
+        <tr><td><strong>Plutarch</strong></td><td>Haskell eDSL</td><td class="mono small">v1.10.1</td><td><Badge kind="live" /></td><td>Hyper-optimized protocols (steep curve)</td></tr>
+        <tr><td><strong>Scalus</strong></td><td>Scala 3</td><td class="mono small">v1.2.0 (2026-09-17)</td><td><Badge kind="live" /></td><td>JVM teams; ships an in-memory ledger emulator</td></tr>
+        <tr><td><strong>OpShin</strong></td><td>Python subset</td><td class="mono small">0.28.0</td><td><Badge kind="live" /></td><td>Python devs, prototyping (lower performance)</td></tr>
+        <tr><td><strong>Helios</strong></td><td>Own DSL, compiler in JS</td><td class="mono small">0.17.33</td><td><Badge kind="coming" label="Pre-1.0" /></td><td>Front-end teams; compiles in the browser</td></tr>
+        <tr><td><strong>pebble</strong> (formerly plu-ts)</td><td>TypeScript-like</td><td class="mono small">0.4.4</td><td><Badge kind="coming" label="Early" /></td><td>TS devs willing to track a young language</td></tr>
+        <tr><td><strong>Marlowe</strong></td><td>Financial DSL + Blockly</td><td class="mono small">marlowe-lang org</td><td><Badge kind="live" label="Niche" /></td><td>Simple escrows and financial contracts</td></tr>
+        <tr><td><strong>Tx3</strong> (not on-chain)</td><td>Transaction-template DSL</td><td class="mono small">0.2x</td><td><Badge kind="coming" label="New" /></td><td>Publishing a dApp's transactions as typed clients</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h3>What an Aiken validator looks like</h3>
+    <p>The official Hello World (Plutus V3 style). Notice what's missing: no storage writes, no <code>msg.sender</code>. The validator inspects the proposed transaction and returns true or false.</p>
+    <pre><code>{aikenCode}</code></pre>
+    <p class="small muted">The <code>?</code> operator traces which condition failed, which you'll love the first time a test goes red. Try it with no install at <a href="https://play.aiken-lang.org" target="_blank" rel="noopener">play.aiken-lang.org</a>.</p>
+
+    <h2 id="sdks">Off-chain SDKs</h2>
+    <p>Your off-chain code builds the transaction the validator will judge. This is where newcomers spend most of their time, and where the choice is most confusing.</p>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>SDK</th><th>Language</th><th>Latest</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Mesh</strong> <code>@meshsdk/core</code></td><td>TS</td><td class="mono small">1.9.1</td><td><Badge kind="live" label="Very active" /></td><td>Most beginner-friendly. React components, contract library, Hydra provider, MCP server and agent skills.</td></tr>
+        <tr><td><strong>Evolution SDK</strong></td><td>TS (Effect)</td><td class="mono small">0.5.17</td><td><Badge kind="live" label="Very active" /></td><td>First project in Intersect's incubation program. Pure TS, no WASM; runs in Node, Bun, Deno, browser and edge. Pre-1.0.</td></tr>
+        <tr><td><strong>Lucid Evolution</strong></td><td>TS</td><td class="mono small">0.6.7</td><td><Badge kind="coming" label="Maintenance" /></td><td>Bug fixes only while Evolution SDK matures. Used by Liqwid, Indigo, WingRiders.</td></tr>
+        <tr><td><strong>Blaze</strong></td><td>TS</td><td class="mono small">0.3.1</td><td><Badge kind="live" /></td><td>Butane team; built-in emulator.</td></tr>
+        <tr><td><strong>cardano-js-sdk</strong></td><td>TS</td><td class="mono small">0.47.1</td><td><Badge kind="live" /></td><td>IOG, powers Lace. Lower-level.</td></tr>
+        <tr><td><strong>PyCardano</strong></td><td>Python</td><td class="mono small">v0.19.2</td><td><Badge kind="live" /></td><td>The Python standard; pairs with OpShin.</td></tr>
+        <tr><td><strong>Cardano Client Lib</strong></td><td>Java</td><td class="mono small">v0.7.2</td><td><Badge kind="live" /></td><td>BloxBean, same team as Yaci DevKit.</td></tr>
+        <tr><td><strong>Atlas</strong></td><td>Haskell</td><td class="mono small">v0.14.1</td><td><Badge kind="coming" label="Slowing" /></td><td>Check activity before adopting.</td></tr>
+        <tr><td>Original Lucid, Nami wallet</td><td>—</td><td>—</td><td><Badge kind="failed" label="Dead" /></td><td>Lucid broke at the Chang upgrade; Nami was folded into Lace. Old tutorials still use both. Skip them.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p>
+        Four active TypeScript SDKs is three too many for a newcomer, and it's the number-one complaint in every developer survey. Our advice:
+        start with <strong>Mesh</strong> if you want to ship something this week, pick <strong>Evolution SDK</strong> if you're starting a
+        long-lived codebase. Both talk to the same chain and the same Aiken blueprints, so the choice is reversible.
+      </p>
+    </Callout>
+
+    <h2 id="infra">Chain access and infrastructure</h2>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>Tool</th><th>What it is</th><th>When to use it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Blockfrost</strong></td><td>Hosted REST API (+ IPFS). Free tier ≈ 50k requests/day, one key per network.</td><td>Default for apps and scripts</td></tr>
+        <tr><td><strong>Koios</strong></td><td>Community-run REST API; usable without a key for light use</td><td>Dashboards, quick scripts, public widgets</td></tr>
+        <tr><td><strong>Ogmios</strong></td><td>WebSocket JSON-RPC bridge to a node (v7.0.0 has breaking schema changes ahead of Dijkstra)</td><td>Transaction evaluation and submission behind most SDKs</td></tr>
+        <tr><td><strong>Kupo</strong></td><td>Lightweight UTxO and datum indexer</td><td>"Give me every UTxO at this script address"</td></tr>
+        <tr><td><strong>Dolos</strong></td><td>TxPipe's lightweight data node; serves a Blockfrost-compatible API, UTxO RPC and more</td><td>Self-hosting without a full node + DB Sync</td></tr>
+        <tr><td><strong>Oura</strong></td><td>Event streaming (node → Kafka, webhooks…)</td><td>Your "event logs" pipeline</td></tr>
+        <tr><td><strong>UTxO RPC</strong></td><td>gRPC spec with SDKs in Python, Go, Rust, Node, .NET</td><td>Streaming, typed, cross-language backends</td></tr>
+        <tr><td><strong>Yaci Store</strong></td><td>Modular Java indexer with a Blockfrost-compatible API</td><td>JVM shops</td></tr>
+        <tr><td><strong>Cardano DB Sync</strong></td><td>The whole chain into PostgreSQL</td><td>Analytics and explorers (heavy)</td></tr>
+        <tr><td><strong>Demeter.run</strong></td><td>Managed Blockfrost-compatible, Ogmios, Kupo and UTxO RPC endpoints; free access for OSS and hackathon teams</td><td>Hosted infra without running a node <Badge kind="unverified" label="IDE workspaces: unclear" /></td></tr>
+        <tr><td><strong>Maestro</strong></td><td>Hosted API for Cardano and Bitcoin; focus shifting toward Bitcoin</td><td>Evaluate longevity first</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <Callout kind="tip">
+      <p>A Blockfrost-compatible REST API is becoming the de facto standard: Blockfrost, Dolos, Yaci Store and Demeter all serve it. Code against that shape and you can swap providers, or self-host, later.</p>
+    </Callout>
+
+    <h3 id="local">Local devnets and emulators</h3>
+    <ul>
+      <li><strong>Yaci DevKit</strong>: <code>create-node -o --start</code>, then <code>topup &lt;addr&gt; &lt;ada&gt;</code>. Sub-second blocks, a viewer UI, Docker or npm (good for CI).</li>
+      <li><strong>In-memory emulators</strong>: Scalus (used by Mesh for offline tests), Blaze and Evolution SDK all ship one.</li>
+      <li><strong><code>aiken check</code> / <code>aiken bench</code></strong>: unit and property tests against a placeholder transaction, with no chain at all.</li>
+      <li><strong>Hydra offline mode</strong>: a single-party head as a very fast sandbox.</li>
+    </ul>
+
+    <h2 id="networks">Networks, faucet, explorers</h2>
+  </div>
+
+  <div class="table-wrap prose">
+    <table>
+      <thead><tr><th>Network</th><th>Use it for</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Preview</strong></td><td>Your first deploys. 1-day epochs; upgrades land here at least 4 weeks before mainnet.</td><td><Badge kind="live" /></td></tr>
+        <tr><td><strong>Preprod</strong></td><td>Final validation; mirrors mainnet closely. Most DeFi and agent testnets live here.</td><td><Badge kind="live" /></td></tr>
+        <tr><td><strong>SanchoNet</strong></td><td>Governance features arrive here first</td><td><Badge kind="live" /></td></tr>
+        <tr><td><strong>DijkstraNet</strong></td><td>Plutus V4 and nested transactions</td><td><Badge kind="coming" /></td></tr>
+        <tr><td><strong>Mainnet</strong></td><td>Production (Conway era, protocol 11)</td><td><Badge kind="live" /></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <ul>
+      <li><strong>Faucet</strong>: <a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noopener">docs.cardano.org faucet</a> gives 10,000 test ADA per request, once every 24 hours, on Preview and Preprod.</li>
+      <li><strong>Explorers</strong>: Cardanoscan (preview.cardanoscan.io), Cexplorer (preview.cexplorer.io), AdaStat, and explorer.cardano.org. <a href="https://tx3.land" target="_blank" rel="noopener">tx3.land</a> shows live per-protocol activity.</li>
+    </ul>
+
+    <h2 id="first-contract">Your first contract on Preview</h2>
+    <p>
+      Lock 10 test ADA at an Aiken validator, then unlock it. <strong>Our estimate: 45–90 minutes</strong> for an experienced developer, most of it
+      setup and waiting for the faucet. That's an educated estimate, not a benchmark. Intersect's own pathway allows a day for a first transaction and
+      about a week for a first Aiken contract including learning time.
+    </p>
+  </div>
+
+  <ol class="walk prose">
+    <li>
+      <h4>Install Aiken and build <span class="muted mono small">~5 min</span></h4>
+      <pre><code>{setupCode}</code></pre>
+    </li>
+    <li>
+      <h4>Get chain access and a wallet <span class="muted mono small">~5 min</span></h4>
+      <p>Create a free <a href="https://blockfrost.io" target="_blank" rel="noopener">Blockfrost</a> project for <strong>Preview</strong> (or use Koios without a key). Generate a wallet with Mesh or Evolution, or use a Lace wallet switched to Preview.</p>
+    </li>
+    <li>
+      <h4>Fund it <span class="muted mono small">~5–10 min</span></h4>
+      <p>Request 10,000 test ADA from the faucet for your address.</p>
+    </li>
+    <li>
+      <h4>Lock, then unlock <span class="muted mono small">~20–40 min</span></h4>
+      <p>A ~50-line TypeScript script: load the compiled code from <code>plutus.json</code>, derive the script address, lock funds with an inline datum, then spend them back with the redeemer, collateral and your signature.</p>
+      <pre><code>{offchainCode}</code></pre>
+      <p class="small muted">Sketch only, to show the shape. SDK APIs move quickly; follow the current Mesh or Evolution docs for exact method names. The unlock transaction adds <code>spendingPlutusScriptV3()</code>, the redeemer, collateral and <code>requiredSignerHash(owner)</code>.</p>
+    </li>
+    <li>
+      <h4>Look at it <span class="muted mono small">~1 min</span></h4>
+      <p>Open both transactions on preview.cexplorer.io or preview.cardanoscan.io. Note that "deploying" was just sending funds to the script's hash address.</p>
+    </li>
+  </ol>
+
+  <div class="prose">
+    <h2 id="ai">Build with your coding agent</h2>
+    <p>In 2026 most developers arrive with Claude Code, Cursor or Codex open. Cardano's AI tooling is better than its reputation:</p>
+    <pre><code>{aiCode}</code></pre>
+    <ul>
+      <li><strong>cardano-dev-skills</strong> (Cardano Foundation): skills such as write-validator, build-transaction, explain-eutxo and setup-devnet, for Claude Code and Codex.</li>
+      <li><strong>Mesh</strong>: MCP server, agent skills for dozens of tools, <code>llms.txt</code>, and the Mimir docs chatbot.</li>
+      <li><strong>Indigo <code>cardano-mcp</code></strong>: wallet-aware MCP (balances, UTxOs, submitting signed transactions). Treat any MCP that can move funds as custodial.</li>
+    </ul>
+
+    <h2 id="pain">Honest DX pain points</h2>
+    <p>From the Cardano Foundation's 2025 survey, Intersect's DevEx working group and IOG's own 2026 problem statement.</p>
+  </div>
+
+  <div class="table-wrap wide">
+    <table>
+      <thead><tr><th>Pain point</th><th>Still true in 2026?</th><th>What to do about it</th></tr></thead>
+      <tbody>
+        <tr><td>Fragmented tooling, no "blessed path"</td><td><Badge kind="gap" label="Yes, #1 complaint" /></td><td>Follow the path above. Official fix (cardano-init, Developer HUB) is due end of Q4 2026.</td></tr>
+        <tr><td>Stale tutorials</td><td><Badge kind="gap" label="Yes" /></td><td>Skip anything mentioning Nami, Flint, original Lucid, play.marlowe.iohk.io or Plutus V2-style validators.</td></tr>
+        <tr><td>eUTxO learning curve</td><td><Badge kind="coming" label="Partly" /></td><td>Read the <a href="/mental-model">mental model</a> page, use design-pattern libraries and the explain-eutxo skill.</td></tr>
+        <tr><td>"You need Haskell"</td><td><Badge kind="live" label="No" /></td><td>Aiken, Python, Scala and TypeScript options all exist.</td></tr>
+        <tr><td>Concurrency</td><td><Badge kind="coming" label="Solved by patterns" /></td><td>Batchers, order books, sharding. Nested transactions arrive with Dijkstra.</td></tr>
+        <tr><td>Script size and budget limits</td><td><Badge kind="coming" label="Improving" /></td><td>Reference scripts, withdraw-zero, and the 2026 builtins and cost cuts help a lot.</td></tr>
+        <tr><td>Min-ADA, collateral, UTxO selection</td><td><Badge kind="gap" label="Yes (inherent)" /></td><td>Let the SDK handle it; understand it once.</td></tr>
+        <tr><td>Breaking changes at era boundaries</td><td><Badge kind="gap" label="Yes" /></td><td>Pin SDK versions; watch the Dijkstra upgrade (Ogmios v7 already changed its schema).</td></tr>
+        <tr><td>No OpenZeppelin equivalent</td><td><Badge kind="gap" label="Yes, for now" /></td><td>Mesh's contract library and the portal's contracts templates today; IOG's audited library is due Dec 2026 <Badge kind="unverified" />.</td></tr>
+        <tr><td>Small developer pool</td><td><Badge kind="gap" label="Yes" /></td><td>IOG itself says ~17× fewer developers than Ethereum. Less competition for whatever you build.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="coming">What's coming to the toolchain</h2>
+    <p>IOG's 3.6M ADA Developer Experience Initiative (June–December 2026) promises:</p>
+    <ul class="status-list">
+      <li><Badge kind="unverified" label="Not shipped yet" /> <span><strong>cardano-init</strong>: a create-cardano-app style CLI with selectable stacks and AI integrations.</span></li>
+      <li><Badge kind="unverified" label="Not shipped yet" /> <span><strong>Contracts library</strong>: five audit-ready, OpenZeppelin-style templates (beta targeted for December).</span></li>
+      <li><Badge kind="unverified" label="Not shipped yet" /> <span><strong>Developer HUB</strong>: a restructured portal with EVM, Web2 and entrepreneur personas.</span></li>
+    </ul>
+    <p class="small muted">As of 2026-10-07 we couldn't confirm any of these has shipped. When they do, this page will switch to them.</p>
+
+    <Sources items={sources} />
+  </div>
+  <NextPrev prev={{ href: "/mental-model", label: "The mental model" }} next={{ href: "/frontiers/defi", label: "Frontiers: DeFi & Bitcoin DeFi" }} />
+</Layout>
+
+<style>
+  .wide { max-width: var(--wide); }
+  .path { display: grid; gap: .75rem; margin: 1rem 0 1.5rem; }
+  @media (min-width: 700px) { .path { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1050px) { .path { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .step h3 { font-size: 1.05rem; margin: .15rem 0 .4rem; }
+  .step p { font-size: .88rem; margin: 0; color: var(--ink-2); }
+  .step .n { font-size: .72rem; color: var(--accent-ink); text-transform: uppercase; letter-spacing: .06em; margin: 0; }
+  .walk { padding-left: 1.3rem; }
+  .walk > li { margin: 0 0 1.3rem; }
+  .walk h4 { margin: 0 0 .4rem; }
+</style>

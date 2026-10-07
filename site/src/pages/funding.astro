@@ -1,0 +1,321 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Badge from "../components/Badge.astro";
+import Callout from "../components/Callout.astro";
+import Stat from "../components/Stat.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+import opportunities from "../data/opportunities.json";
+
+const typeLabels: Record<string, string> = {
+  rfp: "RFP", grant: "Grant", vc: "Venture", accelerator: "Accelerator",
+  retainer: "Retainer", hackathon: "Hackathon", treasury: "Treasury",
+};
+const statusOrder: Record<string, number> = { open: 0, rolling: 1, closed: 2 };
+const opps = [...opportunities].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+const types = [...new Set(opps.map((o) => o.type))];
+const counts = {
+  open: opps.filter((o) => o.status === "open").length,
+  rolling: opps.filter((o) => o.status === "rolling").length,
+  closed: opps.filter((o) => o.status === "closed").length,
+};
+
+const tree = `What are you building, and how far along is it?
+
+├─ Idea or hackathon stage, needs < $20k
+│    → Hackathons, Gimbalabs builder seasons, Midnight hackathons
+│    → Draper Genesis Pre-Accelerator (≤ $20k)
+│
+├─ Product using USDCx / Pyth / programmable tokens / identity,
+│  can reach mainnet in 3 months
+│    → Catalyst (next round not yet announced)
+│
+├─ Live DeFi protocol, wallet, bridge or liquidity tooling
+│    → Cardano PRIME RFP  (open now)
+│
+├─ Startup ready to raise equity or tokens
+│    → Orion Fund, Draper Apex, CF Cardano Accelerator Program
+│
+├─ Open-source library or tool other people depend on
+│    → Intersect Maintainer Retainer  →  Intersect budget process
+│
+└─ Large infrastructure work (≥ ≈ ₳1M), ecosystem-wide impact
+     → Direct treasury withdrawal (67% DReps + CC, ≈ 30 days)
+       Check headroom first: ≈ ₳43M left until Jul 2027`;
+
+const sources = [
+  { label: "AlphaGrowth — Cardano PRIME", url: "https://alphagrowth.io/cardano-prime" },
+  { label: "AlphaGrowth PRIME contact form", url: "https://alphagrowth.typeform.com/cardano-prime" },
+  { label: "The Crypto Basic — community approves ₳120M PRIME", url: "https://thecryptobasic.com/2026/08/12/cardano-community-approves-120-million-ada-allocation-to-boost-defi-liquidity/" },
+  { label: "danonight — PRIME treasury withdrawal details", url: "https://danonight.com/news/cardano-prime-treasury-withdrawal" },
+  { label: "DailyCoin — PRIME's DeFi push and EVM liquidity", url: "https://dailycoin.com/cardanos-200m-defi-push-puts-evm-liquidity-in-focus/" },
+  { label: "CoinTurk — PRIME audit reveals DeFi weaknesses", url: "https://en.coin-turk.com/cardano-gains-7-5yuzde-audit-reveals-defi-weaknesses-as-ada-nears-0-25/" },
+  { label: "Currency Analytics — PRIME's $1:$50 grant rule", url: "https://thecurrencyanalytics.com/altcoins/cardano-prime-and-alphagrowth-offer-50-in-grants-for-every-1-put-into-defi-292507" },
+  { label: "Project Catalyst", url: "https://projectcatalyst.io/" },
+  { label: "Catalyst — update on Fund 15 voting", url: "https://projectcatalyst.io/blog/update-on-fund15-voting" },
+  { label: "Catalyst — meet the 12 teams selected for the Pilot 2026", url: "https://projectcatalyst.io/blog/meet-the-12-teams-selected-for-the-catalyst-pilot-2026" },
+  { label: "CryptoSlate — Catalyst is changing hands", url: "https://cryptoslate.com/cardanos-project-catalyst-is-changing-hands-and-the-pause-is-forcing-builders-to-face-a-brutal-funding-gap/" },
+  { label: "FC Barcelona — Barça Fan Lab launch", url: "https://www.fcbarcelona.com/en/club/news/4581767/fc-barcelona-launches-bara-fan-lab-a-new-digital-experience-that-connects-club-values-with-new-web3-ways-of-participation-and-innovation" },
+  { label: "Catalyst Explorer — FC Barcelona fan engagement infrastructure (F13)", url: "https://www.catalystexplorer.com/en/proposals/fc-barcelona-fan-engagement-infrastructure-cardano-f13" },
+  { label: "Inside World Football — Barça Fan Lab", url: "https://www.insideworldfootball.com/2026/09/28/barca-test-blockchain-with-barca-fan-lab-launch/" },
+  { label: "cardano.org — grants & funding", url: "https://cardano.org/grants-funding/" },
+  { label: "Intersect — Maintainer Retainer", url: "https://devex.intersectmbo.org/docs/maintainer-retainer" },
+  { label: "Cardano Foundation — Orion Fund initial phase", url: "https://cardanofoundation.org/blog/orion-fund-initial-phase" },
+  { label: "Midnight — Night Sky Accelerator", url: "https://midnight.network/blog/night-sky-accelerator" },
+  { label: "Polkadot Fast-Grants final update (comparison)", url: "https://forum.polkadot.network/t/polkadot-fast-grants-programme-final-update-march-31-2026/17423" },
+  { label: "Koios proposal_list (treasury actions, 2026)", url: "https://api.koios.rest/api/v1/proposal_list" },
+];
+---
+<Layout title="Get funded" description="Every realistic way to get paid to build on Cardano in late 2026: open RFPs, grants, accelerators, the treasury, and which route fits you.">
+  <PageHeader eyebrow="Get funded" title="Who will pay you to build here" lede="Cardano has something most chains don't: an on-chain treasury that ADA holders vote to spend, plus several programs funded from it. The money is real. It is also lumpy, slow in places and political, so here is all of it in one place, with the status as of 7 Oct 2026." />
+
+  <div class="grid grid-3">
+    <Stat label="Open now" value={`${counts.open}`} sub="Accepting applications today" />
+    <Stat label="Rolling" value={`${counts.rolling}`} sub="No fixed window" />
+    <Stat label="Closed (watch for next round)" value={`${counts.closed}`} sub="Dates for the next round not announced" />
+  </div>
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p><strong>The funding is real but uneven.</strong> Catalyst, once the default route for small teams, paused its Fund 15 in January 2026 and came back as a much smaller ₳2.5M pilot. Under the current spending cap, only about ₳43M of treasury headroom is left until July 2027 (our calculation from on-chain data). And in 2026, DReps rejected almost every request to fund a single protocol.</p>
+      <p><strong>What still works:</strong> programs that someone else administers (PRIME grants, the Orion Fund, the Maintainer Retainer), and building a public track record first. The board below is sorted with open opportunities first.</p>
+    </Callout>
+  </div>
+
+  <section id="board" class="section">
+    <h2>Opportunity board</h2>
+    <p class="small muted">Each entry shows when it was last checked. Anything we couldn't confirm is marked <Badge kind="unverified" />.</p>
+    <div class="filters" id="filters" hidden>
+      <div class="chips" role="group" aria-label="Filter by status">
+        <span class="small muted">Status</span>
+        <button class="chip" type="button" data-f="status" data-v="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-f="status" data-v="open" aria-pressed="false">Open</button>
+        <button class="chip" type="button" data-f="status" data-v="rolling" aria-pressed="false">Rolling</button>
+        <button class="chip" type="button" data-f="status" data-v="closed" aria-pressed="false">Closed</button>
+      </div>
+      <div class="chips" role="group" aria-label="Filter by type">
+        <span class="small muted">Type</span>
+        <button class="chip" type="button" data-f="type" data-v="all" aria-pressed="true">All</button>
+        {types.map((t) => <button class="chip" type="button" data-f="type" data-v={t} aria-pressed="false">{typeLabels[t]}</button>)}
+      </div>
+    </div>
+    <div class="opps grid grid-2">
+      {opps.map((o) => (
+        <article class="opp card" id={`opp-${o.id}`} data-status={o.status} data-type={o.type}>
+          <div class="opp-top">
+            <Badge kind={o.status as "open" | "rolling" | "closed"} />
+            <span class="type mono">{typeLabels[o.type]}</span>
+            {o.unverified && <Badge kind="unverified" label="Partly unverified" />}
+          </div>
+          <h3><a href={o.url} rel="noopener">{o.name}</a></h3>
+          <p class="org small muted">{o.org}</p>
+          <dl>
+            <dt>Amount</dt><dd>{o.amount}</dd>
+            <dt>Timing</dt><dd>{o.deadline}</dd>
+            <dt>Good fit</dt><dd>{o.fit}</dd>
+          </dl>
+          {o.notes && <p class="small notes">{o.notes}</p>}
+          <p class="stamp">Last verified {o.lastVerified}</p>
+        </article>
+      ))}
+    </div>
+    <p class="small muted" id="empty" hidden>Nothing matches those filters.</p>
+  </section>
+
+  <section id="route" class="section">
+    <h2>Which route fits me?</h2>
+    <div class="wizard card" id="wizard" hidden>
+      <form id="wiz-form">
+        <fieldset>
+          <legend>1. What are you building?</legend>
+          <label><input type="radio" name="kind" value="defi" checked /> A DeFi protocol, wallet, bridge or liquidity tool</label>
+          <label><input type="radio" name="kind" value="oss" /> Open-source tooling or infrastructure</label>
+          <label><input type="radio" name="kind" value="midnight" /> A privacy app on Midnight</label>
+          <label><input type="radio" name="kind" value="product" /> Another product (payments, identity, consumer, AI agents…)</label>
+        </fieldset>
+        <fieldset>
+          <legend>2. How far along are you?</legend>
+          <label><input type="radio" name="stage" value="idea" checked /> Idea</label>
+          <label><input type="radio" name="stage" value="proto" /> Working prototype</label>
+          <label><input type="radio" name="stage" value="live" /> Live with users</label>
+        </fieldset>
+        <fieldset>
+          <legend>3. Do you want to raise equity or token investment?</legend>
+          <label><input type="radio" name="equity" value="no" checked /> No, grants only</label>
+          <label><input type="radio" name="equity" value="yes" /> Yes</label>
+        </fieldset>
+      </form>
+      <div class="wiz-out" aria-live="polite">
+        <p class="label small muted">Start with</p>
+        <ol id="wiz-list"></ol>
+      </div>
+    </div>
+    <p class="small muted">The same logic as a static tree:</p>
+    <pre>{tree}</pre>
+  </section>
+
+  <div class="prose">
+    <h2 id="prime">Cardano PRIME, the biggest open pot</h2>
+    <p><strong>PRIME</strong> (Protocol Readiness, Incentives, and Market Expansion) is a 12-month, ₳120M (≈ $19.2M) DeFi growth program. DReps approved it with about 73% support and it was enacted on <strong>17 Aug 2026</strong>. It's run by <strong>AlphaGrowth</strong>, a growth and research firm. Intersect holds the funds, and a five-person unpaid Operating Group from Blink Labs, CoinCeylon, Midgard Labs, Input Output and Tweag can veto spending (3 of 5).</p>
+  </div>
+  <div class="table-wrap prose-table">
+    <table>
+      <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Phases</td><td>Audit (months 1–2) → gap analysis (to month 4) → incentives (months 5–12). About ₳90M is held back until an Operating Group vote around mid-December 2026.</td></tr>
+        <tr><td>Grants</td><td>$5.6M (₳35M): $3M in Phase 2, $3M gated to Phase 3. No single grant over $1M.</td></tr>
+        <tr><td>Other budget</td><td>$4.32M LP incentives · $4.64M performance fee, paid only against verified TVL growth.</td></tr>
+        <tr><td>Target</td><td>+$200M of qualifying TVL in 12 months. The grant rule of thumb is <strong>$50 of sustained TVL per $1 granted</strong>.</td></tr>
+        <tr><td>Audit result (Sep 2026)</td><td>Cardano DeFi scored <strong>51.3/100</strong> against Ethereum 96.3 and Sui 72.3. Named gaps include bridging, wallets, money markets and automated liquidity management.</td></tr>
+        <tr><td>RFP priorities</td><td>Dual-stack (EVM + Cardano) wallets · an EVM→Cardano bridge · lending and vault standards · liquidity tooling. Also in scope: a common batcher standard, eUTxO-native vaults, a second independent price feed, curated lending, concentrated liquidity, yield-bearing CDP collateral, and a DeFi Gateway SDK.</td></tr>
+        <tr><td>How to apply</td><td>The only public intake we found is the <a href="https://alphagrowth.typeform.com/cardano-prime" rel="noopener">PRIME contact form</a>, plus AlphaGrowth on X and Telegram. <Badge kind="unverified" label="Format & deadline unpublished" /></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <Callout kind="tip">
+      <p>PRIME pays for TVL, not ideas. If you're pre-launch, frame your application around the liquidity your product will attract and keep, and pair it with an existing protocol (Minswap, Liqwid, Indigo) where you can. Our <a href="/gaps">gaps list</a> maps each gap to the PRIME priority it fits.</p>
+    </Callout>
+
+    <h2 id="catalyst">Project Catalyst: what changed in 2026</h2>
+    <p>Catalyst ran for years as Cardano's community-voted grant program: <strong>2,221 proposals funded, more than $150M distributed and 1,500 projects completed</strong> by December 2025. In 2026 it changed shape:</p>
+    <ul>
+      <li><strong>Fund 15</strong> (₳18.5M + 250k USDM, 761 proposals) was <strong>paused on 13 Jan 2026</strong> and never voted on. Its money, and Fund 16's, went back to the treasury.</li>
+      <li>Stewardship moved from IOG to the <strong>Cardano Foundation</strong>.</li>
+      <li>The replacement <strong>Catalyst Pilot 2026</strong> (₳2.5M, grants of 50k–200k ADA) picked <strong>12 teams on 24 Sep 2026</strong>. A 35-person panel chose them instead of a public vote, and payouts depend on real usage: 40% upfront, up to 40% on usage KPIs and 20% for sustained use.</li>
+      <li>No next round has been announced. <Badge kind="unverified" label="Next date" /> Watch <a href="https://projectcatalyst.io/apply" rel="noopener">projectcatalyst.io/apply</a>.</li>
+    </ul>
+  </div>
+
+  <section class="case card" aria-labelledby="barca">
+    <p class="eyebrow">Case study</p>
+    <h2 id="barca">FC Barcelona's Barça Fan Lab came from a Catalyst grant</h2>
+    <div class="case-grid">
+      <div>
+        <p>On <strong>25 Sep 2026</strong> FC Barcelona launched <strong>Barça Fan Lab</strong>, a fan-participation platform built on Cardano by <strong>Andamio</strong>. Fans sign in with their <strong>BarçaID</strong>, which automatically creates a personal Cardano wallet. They then work through learning paths and community activities and earn verifiable on-chain credentials and access tokens.</p>
+        <p>It wasn't a sponsorship deal or a treasury withdrawal. It was a <strong>Catalyst Fund 13</strong> proposal, voted on by the community and paid out by milestone.</p>
+        <p><strong>Why it matters to you:</strong> a small, focused team used a community grant to put Cardano wallets in front of one of the world's biggest sports brands. The same funding route is open to anyone, as long as Catalyst keeps running rounds.</p>
+      </div>
+      <dl class="facts">
+        <dt>Funding</dt><dd>Catalyst Fund 13</dd>
+        <dt>Requested</dt><dd>₳1,425,000</dd>
+        <dt>Paid so far</dt><dd>₳789,500 (₳635,500 remaining)</dd>
+        <dt>Milestones</dt><dd>2 of 6 done, 1 in progress</dd>
+        <dt>Builder</dt><dd>Andamio (on-chain credentials and learning)</dd>
+        <dt>Launched</dt><dd>25 Sep 2026</dd>
+      </dl>
+    </div>
+  </section>
+
+  <div class="prose">
+    <h2 id="compare">How this compares with other chains</h2>
+    <p>Solana's edge isn't its docs; it's that the step after learning pays off quickly (Superteam Earn bounties, Colosseum's up-to-$250k pre-seed). Base pays small retroactive grants of 1–5 ETH. Polkadot ran a treasury-funded Fast-Grants lane that approved $10k grants in about 72 hours. <strong>Cardano has more money than most, but no fast lane for small grants.</strong> If you want to fix that, it's on our <a href="/gaps">gaps list</a> too.</p>
+  </div>
+
+  <Sources items={sources} />
+  <NextPrev prev={{ href: "/frontiers/scaling", label: "Scaling & roadmap" }} next={{ href: "/gaps", label: "Gaps worth building" }} />
+</Layout>
+
+<script is:inline>
+  (function () {
+    // ---- board filters (progressive enhancement) ----
+    var filters = document.getElementById("filters");
+    filters.hidden = false;
+    var state = { status: "all", type: "all" };
+    var cards = document.querySelectorAll(".opp");
+    var empty = document.getElementById("empty");
+    filters.addEventListener("click", function (e) {
+      var b = e.target.closest("button.chip"); if (!b) return;
+      state[b.dataset.f] = b.dataset.v;
+      filters.querySelectorAll('button[data-f="' + b.dataset.f + '"]').forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      var shown = 0;
+      cards.forEach(function (c) {
+        var ok = (state.status === "all" || c.dataset.status === state.status) && (state.type === "all" || c.dataset.type === state.type);
+        c.hidden = !ok; if (ok) shown++;
+      });
+      empty.hidden = shown > 0;
+    });
+
+    // ---- route wizard ----
+    var wiz = document.getElementById("wizard"); wiz.hidden = false;
+    var names = {};
+    cards.forEach(function (c) { names[c.id.replace("opp-", "")] = c.querySelector("h3").textContent; });
+    function pick(kind, stage, equity) {
+      var out = [];
+      if (equity === "yes") out.push("orion", "draper-pre", "cf-cap");
+      if (kind === "defi") {
+        if (stage === "idea") out.push("sponsor-hackathons", "gimbalabs");
+        else out.push("prime-rfp");
+        if (stage === "live") out.push("builder-dao");
+      } else if (kind === "oss") {
+        if (stage === "idea") out.push("sponsor-hackathons", "catalyst-pilot");
+        else out.push("maintainer-retainer", "intersect-budget");
+        if (stage === "live") out.push("treasury-direct");
+      } else if (kind === "midnight") {
+        out.push("midnight-accel");
+        if (stage !== "idea") out.push("catalyst-pilot");
+      } else {
+        if (stage === "idea") out.push("gimbalabs", "sponsor-hackathons");
+        else out.push("catalyst-pilot", "cf-cap");
+        if (stage === "live") out.push("builder-dao");
+      }
+      return out.filter(function (v, i) { return out.indexOf(v) === i; });
+    }
+    var form = document.getElementById("wiz-form"), list = document.getElementById("wiz-list");
+    function render() {
+      var f = new FormData(form);
+      var ids = pick(f.get("kind"), f.get("stage"), f.get("equity"));
+      list.innerHTML = "";
+      ids.forEach(function (id) {
+        var card = document.getElementById("opp-" + id);
+        var li = document.createElement("li");
+        var a = document.createElement("a"); a.href = "#opp-" + id; a.textContent = names[id];
+        li.appendChild(a);
+        var st = card ? card.dataset.status : "";
+        if (st) { var s = document.createElement("span"); s.className = "st " + st; s.textContent = " · " + st; li.appendChild(s); }
+        list.appendChild(li);
+      });
+    }
+    form.addEventListener("change", render); render();
+  })();
+</script>
+
+<style>
+  .filters { display: grid; gap: .6rem; margin: 1rem 0 1.2rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+  .chips > span { min-width: 3.4rem; }
+  .chip { font: inherit; font-size: .84rem; padding: .3rem .75rem; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+  .opp { display: flex; flex-direction: column; }
+  .opp[hidden] { display: none; }
+  .opp-top { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: .5rem; }
+  .opp .type { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .opp h3 { font-size: 1.05rem; margin: 0 0 .2rem; }
+  .opp .org { margin: 0 0 .7rem; }
+  .opp dl { display: grid; grid-template-columns: 5.2rem 1fr; gap: .25rem .7rem; margin: 0 0 .7rem; font-size: .88rem; }
+  .opp dt { color: var(--muted); }
+  .opp dd { margin: 0; }
+  .opp .notes { color: var(--ink-2); }
+  .opp .stamp { margin-top: auto; padding-top: .3rem; }
+  .wizard { display: grid; gap: 1.5rem; margin-bottom: 1.2rem; }
+  @media (min-width: 800px) { .wizard { grid-template-columns: 3fr 2fr; } }
+  .wizard fieldset { border: 0; padding: 0; margin: 0 0 1rem; }
+  .wizard legend { font-weight: 600; margin-bottom: .4rem; }
+  .wizard label { display: flex; gap: .5rem; align-items: baseline; font-size: .93rem; padding: .2rem 0; }
+  .wiz-out { background: var(--surface-2); border-radius: var(--radius-sm); padding: 1rem 1.1rem; }
+  .wiz-out .label { margin: 0 0 .4rem; }
+  .wiz-out ol { margin: 0; padding-left: 1.2rem; }
+  .wiz-out .st { font-family: var(--font-mono); font-size: .75rem; color: var(--muted); }
+  .wiz-out .st.open { color: var(--live); }
+  .wiz-out .st.closed { color: var(--muted); }
+  .prose-table { max-width: 60rem; }
+  .case { margin: 2.5rem 0; max-width: 60rem; }
+  .case h2 { margin-top: 0; padding-top: 0; }
+  .case-grid { display: grid; gap: 1.5rem; }
+  @media (min-width: 760px) { .case-grid { grid-template-columns: 3fr 2fr; } }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: .35rem .9rem; margin: 0; font-size: .9rem; background: var(--surface-2); padding: 1rem; border-radius: var(--radius-sm); align-self: start; }
+  .facts dt { color: var(--muted); }
+  .facts dd { margin: 0; font-weight: 500; }
+  pre { white-space: pre; max-width: 100%; }
+</style>

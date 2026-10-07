@@ -1,0 +1,29 @@
+# Cardano Field Guide
+
+> An independent, honest, technical field guide to building on Cardano, last verified 2026-10-07. Written for engineers coming from Ethereum, Solana, web2 and AI. It is not official documentation: for API and language references use developers.cardano.org, aiken-lang.org and meshjs.dev. This site gives the context around those docs: what's live, what's coming, what's missing, and who funds builders.
+
+Key facts (2026-10-07): mainnet in the Conway era, protocol version 11 (van Rossem hard fork, 2026-07-18). DeFi TVL is about $73M (rank #36), about 270M ADA. In ADA terms TVL was flat from 2023 to mid-2026, then fell about 47% between July and October 2026. The on-chain treasury holds about 1.37B ADA. Aiken is the default smart-contract language. Recommended stack: Aiken + Mesh or Evolution SDK + Blockfrost or Koios + Yaci DevKit, on the Preview testnet.
+
+## Pages
+
+- [State of Cardano](/state): honest on-chain numbers, TVL in USD vs ADA, what broke and what shipped in 2026, the developer gap
+- [The mental model](/mental-model): eUTxO vs account model, anatomy of a spend, concurrency patterns, Solidity→Cardano and Anchor→Cardano translation tables
+- [The stack](/stack): languages, SDKs, APIs, local devnets, testnets and faucets, first contract walkthrough, AI tooling, DX pain points
+- [DeFi & Bitcoin DeFi](/frontiers/defi): protocols, stablecoins, Critical Integrations, Cardano PRIME, BTC rails and their trust models, composable SDKs, gap map
+- [AI agents](/frontiers/ai-agents): Masumi escrow and registry, x402 on Cardano, MCP servers, a paid agent on Preprod
+- [Midnight](/frontiers/midnight): ZK privacy partner chain, Compact, NIGHT/DUST, dev stack, status
+- [Governance & treasury](/frontiers/governance): CIP-1694 bodies and thresholds, treasury numbers, programmable governance, how to request treasury funds
+- [Scaling & roadmap](/frontiers/scaling): hard-fork history, Hydra, Leios, Peras, nested transactions, Plutus V4
+- [Get funded](/funding): open grants, RFPs, funds, retainers and hackathons, with status and deadlines; PRIME; Catalyst and the FC Barcelona case
+- [Gaps worth building](/gaps): products Cardano lacks that small teams could build, with matching funding
+- [Who's who](/ecosystem): organisations, node implementations, community channels
+
+## Official resources
+
+- [Cardano Developer Portal](https://developers.cardano.org)
+- [Aiken](https://aiken-lang.org)
+- [Mesh SDK](https://meshjs.dev)
+- [Evolution SDK](https://intersectmbo.github.io/evolution-sdk/)
+- [Cardano Foundation dev skills for coding agents](https://github.com/cardano-foundation/cardano-dev-skills)
+- [Midnight docs](https://docs.midnight.network)
+- [Masumi docs](https://www.masumi.network/dev)
