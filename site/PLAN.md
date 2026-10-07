@@ -1,7 +1,7 @@
 # Cardano Field Guide — build plan (v1, info-only, no wallet)
 
-Status 2026-10-07: Astro 7 installed in `site/`; `src/styles/global.css`, `src/layouts/Layout.astro`
-and `src/data/tvl-history.json` done. Research lives in `../research/01–05*.md`.
+Status 2026-10-08: v1 complete, 13 pages built and checked at 375px and 1280px, light and dark.
+Research lives in `../research/01–05*.md`.
 
 ## Decisions (from user)
 - All-English site. Honest tone: show bad data, but always explain it and say what builders can do.

@@ -142,8 +142,8 @@ pre .c { color: var(--muted); }
 /* ---------- layout ---------- */
 .container { width: 100%; max-width: var(--wide); margin: 0 auto; padding: 0 var(--gutter); }
 .prose { max-width: var(--prose); }
-main { padding: 2.5rem 0 4rem; }
-@media (min-width: 720px) { :root { --gutter: 28px; } main { padding-top: 3.5rem; } }
+main.container { padding-top: 2.5rem; padding-bottom: 4rem; }
+@media (min-width: 720px) { :root { --gutter: 28px; } main.container { padding-top: 3.5rem; } }
 
 /* ---------- tables ---------- */
 .table-wrap { overflow-x: auto; margin: 0 0 1.6em; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }

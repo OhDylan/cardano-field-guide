@@ -1,0 +1,6 @@
+{
+  "name": "cardano-field-guide-root",
+  "private": true,
+  "description": "Repo root. The site lives in site/ (see vercel.json).",
+  "engines": { "node": ">=22.12.0" }
+}
