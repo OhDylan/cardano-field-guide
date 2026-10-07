@@ -1,0 +1,200 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import Callout from "../../components/Callout.astro";
+import Badge from "../../components/Badge.astro";
+import Sources from "../../components/Sources.astro";
+import NextPrev from "../../components/NextPrev.astro";
+import FrontierTabs from "../../components/FrontierTabs.astro";
+import LiveFourWay from "../../components/LiveFourWay.astro";
+
+type Kind = "live" | "coming";
+const timeline: { name: string; date: string; pv: string; kind: Kind; unlocks: string; detail: string }[] = [
+  { name: "Mary", date: "Mar 2021", pv: "PV 4", kind: "live", unlocks: "Native tokens", detail: "Tokens and NFTs became a ledger feature. No contract needed to mint or transfer." },
+  { name: "Alonzo", date: "Sep 2021", pv: "PV 5", kind: "live", unlocks: "Smart contracts", detail: "Plutus V1 validators: the first time you could lock value behind custom logic." },
+  { name: "Vasil", date: "Sep 2022", pv: "PV 7", kind: "live", unlocks: "Cheaper, readable state", detail: "Plutus V2, reference inputs (read without spending), inline datums, reference scripts. Oracles and shared config became practical." },
+  { name: "Valentine", date: "Feb 2023", pv: "PV 8", kind: "live", unlocks: "Cross-chain signatures", detail: "SECP256k1 builtins (ECDSA and Schnorr), so validators can check Bitcoin- and Ethereum-style signatures." },
+  { name: "Chang", date: "1 Sep 2024", pv: "PV 9", kind: "live", unlocks: "Plutus V3 + governance", detail: "Single-argument scripts, governance script purposes, BLS12-381 (17 primitives), Blake2b-224, Keccak-256, sums-of-products encoding. CIP-1694 governance begins." },
+  { name: "Plomin", date: "29 Jan 2025", pv: "PV 10", kind: "live", unlocks: "Full on-chain governance", detail: "DReps vote on everything, including treasury withdrawals. Bitwise builtins and RIPEMD-160 arrive." },
+  { name: "van Rossem", date: "18 Jul 2026", pv: "PV 11", kind: "live", unlocks: "Faster, cheaper scripts; ZK-friendly maths", detail: "All builtins unified across Plutus V1–V3. 'case' on builtin types, native arrays, BLS12-381 multi-scalar multiplication, modular exponentiation, faster value ops, and a cost-model update that cut costs for existing operations. The first hard fork proposed and ratified entirely on-chain (77.6% DRep, 52.7% SPO, plus the Constitutional Committee)." },
+  { name: "Dijkstra (phase 1)", date: "Est. Dec 2026 – Mar 2027", pv: "PV 12", kind: "coming", unlocks: "Leios, nested transactions, Plutus V4", detail: "Ouroboros Linear Leios (higher throughput), nested transactions (native intents and Babel fees), Plutus V4 and observe/guard scripts. Intersect's estimate for mainnet: Dec 2026–Jan 2027 at moderate confidence, Feb–Mar 2027 at high confidence." },
+  { name: "Dijkstra (phase 2)", date: "Target ~Q2 2027", pv: "PV 12.x", kind: "coming", unlocks: "Fast settlement (Peras)", detail: "Ouroboros Peras: stake-pool votes give settlement in minutes instead of a long probabilistic wait. Matters for bridges, exchanges and L2s." },
+];
+
+const sources = [
+  { label: "Cardano.org: hard forks list", url: "https://cardano.org/hardforks" },
+  { label: "Cardano.org glossary: van Rossem", url: "https://cardano.org/glossary/van-rossem/" },
+  { label: "CoinDesk: Inside Cardano's van Rossem hard fork (2026-07-20)", url: "https://www.coindesk.com/markets/2026/07/20/inside-cardano-s-van-rossum-hard-fork-and-what-it-means-for-users" },
+  { label: "Intersect: van Rossem upgrade overview", url: "https://cardanoupgrades.docs.intersectmbo.org/van-rossem-upgrade" },
+  { label: "Intersect Product Committee: Dijkstra phased rollout plan", url: "https://product.cardano.intersectmbo.org/hardfork-planning/dijkstra/" },
+  { label: "Intersect: Dijkstra upgrade overview", url: "https://cardanoupgrades.docs.intersectmbo.org/dijkstra-era-upgrade/dijkstra-upgrade-overview" },
+  { label: "Intersect weekly update #127 (2026-09-05)", url: "https://intersectmbo.org/news/intersect-weekly-update-127-sep-5-2026" },
+  { label: "Cardano.org: Leios is how it gets there (2026-05-14)", url: "https://cardano.org/news/2026-05-14-cardano-is-ready-to-grow/" },
+  { label: "Leios FAQ", url: "https://leios.cardano-scaling.org/docs/faq/" },
+  { label: "CryptoBriefing: Leios testnet 'Musashi Dojo'", url: "https://cryptobriefing.com/cardano-to-launch-leios-testnet-under-musashi-dojo-name/" },
+  { label: "CIP-140 Ouroboros Peras", url: "https://cips.cardano.org/cip/CIP-140" },
+  { label: "CIP-118 Nested transactions", url: "https://cips.cardano.org/cip/CIP-0118" },
+  { label: "IOG: Babel fees", url: "https://www.iog.io/news/babel-fees" },
+  { label: "IOG: Scaling Cardano applications with Hydra (v1)", url: "https://www.iog.io/news/scaling-cardano-applications-with-hydra" },
+  { label: "Hydra changelog (v1.0.0 → v2.4.1)", url: "https://github.com/cardano-scaling/hydra/blob/master/CHANGELOG.md" },
+  { label: "Hydra docs", url: "https://hydra.family/head-protocol/" },
+  { label: "Midnight: partners operating Hydra heads (Glacier Drop)", url: "https://midnight.network/blog/partners-operating-hydra-heads" },
+  { label: "IOG Hydra solution page (live users)", url: "https://cardano-engineering.iog.io/solutions/hydra" },
+  { label: "DefiLlama: DeltaDeFi", url: "https://defillama.com/protocol/deltadefi" },
+  { label: "Mithril docs", url: "https://mithril.network/doc" },
+  { label: "Intersect: Plutus Core update (UPLC optimizer results)", url: "https://updates.cardano.intersectmbo.org/2026-04-22-plutus-core" },
+  { label: "Partner Chains repo (archived 2026-04-23)", url: "https://github.com/input-output-hk/partner-chains" },
+  { label: "Cardano.org glossary: Amaru", url: "https://cardano.org/glossary/amaru/" },
+];
+---
+<Layout title="Scaling & roadmap" description="What Cardano's upgrades actually unlock for builders: van Rossem, Dijkstra (Leios, nested transactions, Plutus V4), Peras, Hydra and Mithril, with honest status.">
+  <PageHeader
+    eyebrow="Frontiers · Scaling & roadmap"
+    title="What each upgrade unlocks for you"
+    lede="Skip the TPS marketing. Here is what has shipped, what is scheduled, and what each change means for the code you write."
+  />
+  <FrontierTabs />
+
+  <LiveFourWay>
+    <ul slot="live">
+      <li><strong>van Rossem</strong> (July 2026): cheaper scripts, native arrays, ZK-friendly maths in every Plutus version.</li>
+      <li><strong>Hydra</strong> v2.x: production-ready L2 heads among known participants.</li>
+      <li><strong>Mithril</strong>: node bootstrap in minutes from stake-certified snapshots.</li>
+      <li><strong>Leios testnet</strong> ("Musashi Dojo") since 23 Jun 2026.</li>
+    </ul>
+    <ul slot="coming">
+      <li><strong>Dijkstra era</strong>: Linear Leios, nested transactions, Plutus V4, observe scripts. Est. Dec 2026–Mar 2027.</li>
+      <li><strong>Peras</strong>: fast settlement, ~Q2 2027.</li>
+      <li><strong>Amaru</strong> (Rust node) block production, targeted Nov 2026.</li>
+    </ul>
+    <ul slot="gaps">
+      <li>Hydra apps that last: DeltaDeFi, the flagship Hydra order book, paused in July 2026 for lack of funding.</li>
+      <li>Intent/solver infrastructure ready for nested transactions on day one.</li>
+      <li>Indexers and explorers updated for Leios block types.</li>
+      <li>On-chain ZK verifiers (Groth16/PLONK) using the new BLS builtins.</li>
+    </ul>
+    <ul slot="try">
+      <li>Run a single-party <a href="https://hydra.family/head-protocol/" target="_blank" rel="noopener">Hydra head</a> offline and push transactions through it.</li>
+      <li>Use Mesh's <code>@meshsdk/hydra</code> provider against a local head.</li>
+      <li>Benchmark a validator with <code>aiken bench</code> before and after using PV11 builtins.</li>
+    </ul>
+  </LiveFourWay>
+
+  <div class="prose">
+    <h2 id="timeline">The upgrade timeline</h2>
+    <p>Cardano upgrades by named hard forks, and since 2025 every one of them has to pass an on-chain governance vote. Testnets get them first: Preview, then Preprod, then mainnet.</p>
+  </div>
+
+  <ol class="timeline prose">
+    {timeline.map((t) => (
+      <li class={t.kind}>
+        <div class="tl-head">
+          <span class="tl-name">{t.name}</span>
+          <span class="tl-date mono">{t.date} · {t.pv}</span>
+          {t.kind === "coming" ? <Badge kind="coming" /> : <Badge kind="live" label="Shipped" />}
+        </div>
+        <p class="tl-unlock"><strong>Unlocks:</strong> {t.unlocks}</p>
+        <p class="tl-detail">{t.detail}</p>
+      </li>
+    ))}
+  </ol>
+  <p class="stamp prose">Mainnet today: Conway era, protocol version 11.0, epoch 660 (Koios, 2026-10-07). Dates for Dijkstra and Peras are targets set by Intersect working groups and still need governance approval.</p>
+
+  <div class="prose">
+    <h2 id="hydra">Hydra: L2 heads <Badge kind="live" /></h2>
+    <p>
+      A Hydra head is an isomorphic state channel: a small group of known participants runs the <em>same</em> ledger rules and the <em>same</em> Plutus
+      scripts off-chain, then settles back to L1. Your validators work unchanged inside a head.
+    </p>
+    <ul>
+      <li><strong>v1.0</strong> (Oct 2025) was declared production-ready. <strong>v2.0</strong> (Apr 2026) removed the commit phase, so heads open directly and funds are added by incremental deposits; it also lifted the 100 ADA mainnet commit cap. Current: <strong>2.4.1</strong>.</li>
+      <li><strong>Real deployment:</strong> Midnight's Glacier Drop token distribution ran through Hydra heads operated by Alchemy, Anastasia Labs, BitGo, Blockdaemon, IOE and Sundae Labs.</li>
+      <li><strong>Good fit:</strong> payments, games, order matching, anything with a known set of high-frequency participants. <strong>Poor fit:</strong> open, permissionless pools where anyone can join at any moment.</li>
+    </ul>
+    <Callout kind="honest">
+      <p>
+        The technology works; the businesses on top of it are fragile. DeltaDeFi, the most visible Hydra-based exchange, <strong>paused operations on 15 July 2026</strong>
+        for lack of funding. If you build on Hydra, plan for the operational cost of running head participants, and budget for distribution, not just engineering.
+      </p>
+    </Callout>
+
+    <h2 id="leios">Ouroboros Leios: throughput <Badge kind="coming" /></h2>
+    <p>
+      Leios adds endorser blocks, certified by stake-pool committees, alongside normal Praos blocks. The "Linear" variant (CIP-164) ships in the Dijkstra era, with
+      throughput then raised gradually by parameter changes.
+    </p>
+    <ul>
+      <li><strong>Status:</strong> public testnet ("Musashi Dojo" / MusashiNet) live since 23 June 2026. The first testnet reached roughly 6× current throughput under synthetic load.</li>
+      <li><strong>Claims, labelled as claims:</strong> the Leios FAQ talks about up to 1,500+ TPS (30–65× today). Treat that as a ceiling, not a promise.</li>
+      <li><strong>For your dApp:</strong> mostly transparent. Expect cheaper, faster inclusion under load. If you run an indexer or explorer, budget for new block types.</li>
+    </ul>
+
+    <h2 id="nested">Nested transactions and Babel fees <Badge kind="coming" /></h2>
+    <p>
+      CIP-118 lets a transaction contain sub-transactions with their own witnesses that don't have to balance on their own. A third party completes and batches them.
+      That gives Cardano <strong>native intents</strong> and <strong>atomic multi-party swaps</strong>, and enables <strong>Babel fees</strong>: a user pays fees in USDCx or any
+      token while someone else covers the ADA. Implementation is reported "well advanced" for Dijkstra phase 1.
+    </p>
+    <Callout kind="tip">
+      <p>This is the biggest change to how Cardano DeFi gets designed since Vasil. If you build solvers, aggregators or wallets, prototyping against DijkstraNet early is a real head start.</p>
+    </Callout>
+
+    <h2 id="plutus">Plutus V4 and observe scripts <Badge kind="coming" /></h2>
+    <p>
+      A new script context plus an "observe" (guard) script purpose (CIP-112) for clean transaction-level checks. Over time this replaces the withdraw-zero trick that
+      protocols use today to run shared logic once per transaction.
+    </p>
+
+    <h2 id="peras">Ouroboros Peras: fast settlement <Badge kind="coming" /></h2>
+    <p>
+      Praos finality is probabilistic, which is why exchanges and bridges wait a long time. Peras (CIP-140) adds stake-pool voting so settlement takes minutes. Target:
+      Dijkstra phase 2, around Q2 2027.
+    </p>
+
+    <h2 id="zk">ZK-friendly cryptography <Badge kind="live" /></h2>
+    <p>
+      Already on mainnet: BLS12-381 (since Chang), plus <strong>multi-scalar multiplication</strong> and <strong>modular exponentiation</strong> (van Rossem), Keccak-256,
+      Blake2b-224, RIPEMD-160 and SECP256k1. Together that's enough to verify Groth16 or PLONK proofs on-chain and check Ethereum and Bitcoin signatures.
+      Aiken 1.1.24 already supports the new builtins.
+    </p>
+
+    <h2 id="perf">Plutus performance</h2>
+    <p>
+      Sums-of-products encoding (V3), <code>case</code> on builtin types and native arrays (PV11), a cost-model cut in June 2026, and a UPLC optimizer that saves about 10%
+      execution cost on average across existing mainnet scripts. More logic now fits in a transaction than a year ago.
+    </p>
+
+    <h2 id="mithril">Mithril <Badge kind="live" /></h2>
+    <p>
+      Stake-based threshold signatures over chain snapshots. Today it bootstraps a node in minutes rather than days, and the Amaru node uses it. It's also the foundation
+      for light clients and for trust-minimized bridges (the Pogun Bitcoin bridge design verifies Mithril certificates).
+    </p>
+
+    <h2 id="partner-chains">Partner chains</h2>
+    <p>
+      IOG's standalone Partner Chains toolkit repo was <strong>archived in April 2026</strong>; the code now lives inside Midnight's node. Treat it as Midnight infrastructure.
+      For privacy, build <em>on</em> <a href="/frontiers/midnight">Midnight</a> rather than launching your own partner chain.
+    </p>
+
+    <h2 id="nodes">Node diversity</h2>
+    <p>
+      Cardano is moving from one Haskell node to several independent implementations: Amaru (Rust, mainnet relay today, block production targeted for November 2026)
+      and Dingo (Go, testnet). That's a strong signal that independent teams can work on the core protocol. See <a href="/ecosystem">Who's who</a> for the full list and who funds them.
+    </p>
+
+    <Sources items={sources} />
+  </div>
+  <NextPrev prev={{ href: "/frontiers/governance", label: "Governance & treasury" }} next={{ href: "/funding", label: "Get funded" }} />
+</Layout>
+
+<style>
+  .timeline { list-style: none; padding: 0 0 0 1.4rem; margin: 1.5rem 0 1rem; border-left: 2px solid var(--line-strong); }
+  .timeline li { position: relative; margin: 0 0 1.4rem; padding-left: .4rem; }
+  .timeline li::before { content: ""; position: absolute; left: calc(-1.4rem - 7px); top: .45rem; width: 12px; height: 12px; border-radius: 50%; background: var(--live); border: 2px solid var(--bg); }
+  .timeline li.coming::before { background: var(--bg); border: 2px solid var(--coming); }
+  .tl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .7rem; }
+  .tl-name { font-weight: 600; font-size: 1.05rem; }
+  .tl-date { font-size: .78rem; color: var(--muted); }
+  .tl-unlock { margin: .25rem 0 .2rem; }
+  .tl-detail { margin: 0; font-size: .92rem; color: var(--ink-2); }
+</style>

@@ -1,0 +1,271 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FrontierTabs from "../../components/FrontierTabs.astro";
+import LiveFourWay from "../../components/LiveFourWay.astro";
+import Badge from "../../components/Badge.astro";
+import Callout from "../../components/Callout.astro";
+import Sources from "../../components/Sources.astro";
+import NextPrev from "../../components/NextPrev.astro";
+
+// Verbatim from midnightntwrk/example-bboard (contract/src/bboard.compact)
+const bboard = `pragma language_version 0.23;
+import CompactStandardLibrary;
+
+export enum State { VACANT, OCCUPIED }
+export ledger state: State;                       // public on-chain state
+export ledger message: Maybe<Opaque<"string">>;
+export ledger sequence: Counter;
+export ledger owner: Bytes<32>;
+
+constructor() {
+  state = State.VACANT;
+  message = none<Opaque<"string">>();
+  sequence.increment(1);
+}
+
+witness localSecretKey(): Bytes<32>;              // private input, supplied by TypeScript, never on-chain
+
+export circuit post(newMessage: Opaque<"string">): [] {
+  assert(state == State.VACANT, "Attempted to post to an occupied board");
+  owner = disclose(publicKey(localSecretKey(), sequence as Field as Bytes<32>));
+  message = disclose(some<Opaque<"string">>(newMessage));
+  state = State.OCCUPIED;
+}
+
+export circuit takeDown(): Opaque<"string"> {
+  assert(state == State.OCCUPIED, "Attempted to take down post from an empty board");
+  assert(owner == publicKey(localSecretKey(), sequence as Field as Bytes<32>), "Not the current owner");
+  const formerMsg = message.value;
+  state = State.VACANT;
+  sequence.increment(1);
+  message = none<Opaque<"string">>();
+  return formerMsg;
+}
+
+export circuit publicKey(sk: Bytes<32>, sequence: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "bboard:pk:"), sequence, sk]);
+}`;
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const bboardHtml = esc(bboard)
+  .replace(/(\/\/[^\n]*)/g, '<span class="c">$1</span>')
+  .replace(/\bledger\b/g, '<mark class="k-pub">ledger</mark>')
+  .replace(/\bwitness\b/g, '<mark class="k-priv">witness</mark>')
+  .replace(/\blocalSecretKey\(\)/g, '<mark class="k-priv">localSecretKey()</mark>')
+  .replace(/\bdisclose\(/g, '<mark class="k-disc">disclose</mark>(')
+  .replace(/\bcircuit\b/g, '<mark class="k-circ">circuit</mark>');
+
+const scaffold = `npx create-mn-app@latest my-app
+cd my-app && npm run setup     # local devnet with pre-minted NIGHT, no faucet needed
+# public testnets: --network preview | preprod`;
+
+const install = `curl --proto '=https' --tlsv1.2 -LsSf \\
+  https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+compact update 0.31.1
+
+# proof server: private inputs never leave your machine
+docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v
+
+# AI help in Claude Code
+claude mcp add --transport http midnight https://midnight.mcp.kapa.ai`;
+
+const sources = [
+  { label: "Midnight — State of the Network, March 2026", url: "https://midnight.network/blog/state-of-the-network-march-2026" },
+  { label: "Midnight — Midnight network is live", url: "https://midnight.network/blog/midnight-network-is-live" },
+  { label: "Midnight — mainnet trusted node operators", url: "https://midnight.network/blog/introducing-midnight-mainnet-trusted-node-operators" },
+  { label: "Midnight — State of the Network, August 2026", url: "https://midnight.network/blog/state-of-the-network-august-2026" },
+  { label: "Midnight — Guide to the NIGHT token launch and redemption", url: "https://midnight.network/blog/guide-to-the-night-token-launch-and-redemption" },
+  { label: "Midnight — tokenomics", url: "https://midnight.network/blog/the-tokenomics-powering-midnight-network" },
+  { label: "Midnight docs — DUST architecture", url: "https://docs.midnight.network/blog/dust-architecture" },
+  { label: "Midnight docs — installation", url: "https://docs.midnight.network/getting-started/installation" },
+  { label: "Midnight docs — support matrix", url: "https://docs.midnight.network/relnotes/support-matrix" },
+  { label: "Midnight docs — network endpoints", url: "https://docs.midnight.network/relnotes/network" },
+  { label: "Midnight docs — acquire tokens (faucets)", url: "https://docs.midnight.network/guides/acquire-tokens" },
+  { label: "Midnight docs — run a validator", url: "https://docs.midnight.network/validate/run-a-validator" },
+  { label: "Midnight docs — Kapa MCP server", url: "https://docs.midnight.network/ai-integration/kapa-mcp-server" },
+  { label: "create-mn-app", url: "https://github.com/midnightntwrk/create-mn-app" },
+  { label: "example-bboard (Compact source)", url: "https://github.com/midnightntwrk/example-bboard" },
+  { label: "CaptainAltcoin — Midnight smart contracts go permissionless (news)", url: "https://captainaltcoin.com/cardano-news-midnight-enters-its-next-phase-as-smart-contracts-go-permissionless/" },
+  { label: "CoinMarketCap — Midnight latest updates", url: "https://coinmarketcap.com/cmc-ai/midnight-network/latest-updates/" },
+  { label: "IOG partner chains toolkit (archived)", url: "https://github.com/input-output-hk/partner-chains" },
+  { label: "Charli3 partner chain docs", url: "https://docs.charli3.io/partner-chains" },
+  { label: "Midnight — Night Sky Accelerator", url: "https://midnight.network/blog/night-sky-accelerator" },
+  { label: "Midnight hackathons", url: "https://midnight.network/hackathon" },
+];
+---
+<Layout title="Midnight: privacy partner chain" description="Midnight for builders: a ZK data-protection chain next to Cardano, the NIGHT/DUST fee model, the Compact language, and how to try it in ten minutes.">
+  <FrontierTabs />
+  <PageHeader eyebrow="Frontier · Privacy" title="Midnight: the privacy partner chain" lede="Midnight is a data-protection blockchain that runs as a Cardano partner chain. You write contracts in Compact, a TypeScript-like language; users prove facts about private data locally with zero-knowledge proofs, and only what you explicitly disclose reaches the chain." />
+
+  <LiveFourWay>
+    <ul slot="live">
+      <li>Federated mainnet since the 2026-03-17 genesis block</li>
+      <li>Permissionless contract deployment (since ≈2026-10-02) <Badge kind="unverified" label="News only" /></li>
+      <li>Blockfrost as public mainnet RPC and indexer</li>
+      <li>Compact 0.31.1, Midnight.js 4.1.1, wallets: Lace, 1AM, Gero, CTRL</li>
+    </ul>
+    <ul slot="coming">
+      <li><strong>Mōhalu</strong>: Cardano SPOs as block producers, rewards, DUST Capacity Exchange (looks delayed past its Q2–Q3 target)</li>
+      <li><strong>Hua</strong>: full decentralisation and "hybrid dApps" on other chains</li>
+      <li>Two-way Cardano ↔ Midnight bridge (one-way today)</li>
+    </ul>
+    <ul slot="gaps">
+      <li>Private identity and credential apps people actually use</li>
+      <li>Compliant DeFi with selective disclosure to auditors</li>
+      <li>Developer tooling: debuggers, test frameworks, indexers for shielded state</li>
+      <li>Fee-sponsorship UX so users never touch a token</li>
+    </ul>
+    <ul slot="try">
+      <li><code>npx create-mn-app</code>: local devnet, no faucet</li>
+      <li>tNIGHT from the Preprod faucet, then "Generate tDUST" in Lace</li>
+      <li>Add the Midnight MCP to your coding agent</li>
+    </ul>
+  </LiveFourWay>
+
+  <h2>Status timeline</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Event</th></tr></thead>
+      <tbody>
+        <tr><td>Aug–Oct 2025</td><td><strong>Glacier Drop</strong>: 3.547B NIGHT claimed by 170k+ self-custody wallets across ADA, BTC, ETH, SOL, XRP, BNB, AVAX and BAT holders.</td></tr>
+        <tr><td>Oct–Nov 2025</td><td><strong>Scavenger Mine</strong>: compute-puzzle phase open to anyone; 1B NIGHT to 8M+ wallets.</td></tr>
+        <tr><td>2025-12-04</td><td>NIGHT launches as a Cardano native asset; redemption thaws over 360 days.</td></tr>
+        <tr><td><strong>2026-03-17</strong></td><td><strong>Genesis block</strong> of the federated mainnet (Kūkolu). Operators include Google Cloud, Blockdaemon, MoneyGram, Worldpay, Bullish, Vodafone's Pairpoint and eToro.</td></tr>
+        <tr><td>Mar–Sep 2026</td><td>Gated deployment: mainnet contracts needed a Foundation security review.</td></tr>
+        <tr><td>Aug 2026</td><td>Sundae Labs Capacity Exchange lets users pay fees in USDM; VIA Labs cross-chain messaging; Gero and 1AM add DUST generation.</td></tr>
+        <tr><td>2026-09-30</td><td>Midnight-hosted endpoints retired; Blockfrost becomes the public mainnet RPC.</td></tr>
+        <tr><td>≈2026-10-02</td><td>Permissionless contract deployment, reported by several news outlets. We found no official Midnight post. <Badge kind="unverified" /></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>NIGHT and DUST, explained for EVM developers</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>NIGHT</th><th>DUST</th></tr></thead>
+      <tbody>
+        <tr><th>What it is</th><td>Unshielded native token, fixed 24B supply</td><td>Shielded, <strong>non-transferable, decaying resource</strong>. Not a token you can trade.</td></tr>
+        <tr><th>Role</th><td>Governance, block rewards, and <strong>generating DUST</strong></td><td>Pays transaction fees</td></tr>
+        <tr><th>Mechanics</th><td>Hold NIGHT and designate a DUST address</td><td>Charges like a battery up to a cap (≈5 DUST per NIGHT, ≈7 days to full). Decays if the backing NIGHT moves.</td></tr>
+        <tr><th>EVM analogy</th><td>Like owning a share of block space</td><td>Like gas you regenerate instead of buy</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <p>Why this matters for builders: <strong>fees are not tied to a token's market price</strong>, and a dApp can <strong>sponsor DUST</strong> so its users never hold a token at all. The Capacity Exchange also lets users pay in other assets such as USDM.</p>
+
+    <h2>How Midnight relates to Cardano</h2>
+    <ul>
+      <li><strong>Security.</strong> Midnight is a partner chain whose validator set will mix permissioned nodes with registered Cardano stake pool operators. Today only the federated operators produce blocks; SPO block production comes in Mōhalu.</li>
+      <li><strong>Liquidity.</strong> NIGHT started as a Cardano native asset, so <strong>cNIGHT</strong> trades on Cardano DEXes and sits in Cardano wallets, and can generate DUST without bridging.</li>
+      <li><strong>Bridge.</strong> The cNIGHT → mNIGHT bridge (MIP-20) is <strong>one-way, Cardano to Midnight</strong>, for now.</li>
+    </ul>
+    <Callout kind="honest">
+      <p>Midnight is live, but it is a federated network in its first phase, and its decentralisation milestones are running late. Treat it as production-capable for pilots and early products, and plan for protocol changes. The upside: it is early enough that a solid tool or app can become the default.</p>
+    </Callout>
+  </div>
+
+  <h2>Developer stack</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Piece</th><th>Current</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Compact</strong></td><td>Compiler 0.31.1, language 0.23</td><td>TypeScript-like DSL that compiles to ZK circuits <em>and</em> a TypeScript API. Linux and macOS; Windows via WSL.</td></tr>
+        <tr><td><strong>Proof server</strong></td><td>8.1.0 (Docker)</td><td>Runs locally, so private inputs never leave the machine.</td></tr>
+        <tr><td><strong>Midnight.js</strong></td><td>4.1.1</td><td>Wallet SDK 1.2.0, DApp Connector API 4.0.1, GraphQL indexer 4.3.x.</td></tr>
+        <tr><td><strong>Scaffolder</strong></td><td><code>create-mn-app</code> 0.5.1</td><td>Templates: hello-world, bboard, battleship, leaderboard. Bundled local devnet.</td></tr>
+        <tr><td><strong>Networks</strong></td><td>Preview, Preprod, Mainnet</td><td><code>rpc.preview.midnight.network</code>, <code>rpc.preprod.midnight.network</code>, <code>rpc.midnight-mainnet.blockfrost.io</code></td></tr>
+        <tr><td><strong>Faucets</strong></td><td>1,000 tNIGHT per request</td><td>Nethermind-hosted faucets for Preprod and Preview; then "Generate tDUST" in Lace.</td></tr>
+        <tr><td><strong>AI tooling</strong></td><td>Kapa MCP, Midnight Expert plugin</td><td>The older npm <code>midnight-mcp</code> is deprecated.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <pre><code>{scaffold}</code></pre>
+    <pre><code>{install}</code></pre>
+  </div>
+
+  <h2 id="compact">Read a real Compact contract</h2>
+  <div class="prose">
+    <p>This bulletin board lets one person post a message and later take it down, proving they are the owner <strong>without ever revealing their secret key</strong>. It is verbatim from Midnight's example repo.</p>
+  </div>
+  <div class="compact-wrap" id="compact-demo" data-hl="on">
+    <div class="legend" role="group" aria-label="Highlight">
+      <button class="btn" type="button" aria-pressed="true" id="hl-toggle">Privacy highlighting: on</button>
+      <span><mark class="k-pub">ledger</mark> public on-chain state</span>
+      <span><mark class="k-priv">witness</mark> private input, stays local</span>
+      <span><mark class="k-disc">disclose</mark> explicit private → public</span>
+      <span><mark class="k-circ">circuit</mark> becomes a ZK proof</span>
+    </div>
+    <pre class="compact"><code set:html={bboardHtml}></code></pre>
+  </div>
+  <div class="prose">
+    <ul>
+      <li><code>ledger</code> is like contract storage, and it is public.</li>
+      <li><code>circuit</code> is like an external function. The caller proves locally that they ran it correctly.</li>
+      <li><code>witness</code> is a private input supplied by your dApp's TypeScript (for example from local storage).</li>
+      <li><code>disclose()</code> marks any private-derived value that becomes public. <strong>The compiler rejects accidental leaks</strong>: remove a <code>disclose()</code> above and the contract no longer compiles.</li>
+    </ul>
+  </div>
+
+  <h2>What Midnight is good for</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Use case</th><th>Why Midnight</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td>Private identity and credentials</td><td>Prove age, residency, KYC status or membership without revealing the data</td><td>ZK Identity challenge</td></tr>
+        <tr><td>Compliant DeFi and stablecoins</td><td>Shielded balances plus selective disclosure to auditors</td><td>W3i shieldUSD, Ascend perps</td></tr>
+        <tr><td>Voting and governance</td><td>Prove eligibility and vote without linking the vote to an identity</td><td>Common tutorial pattern</td></tr>
+        <tr><td>Healthcare and data sharing</td><td>Prove facts about records while the data stays local</td><td>Hackathon theme</td></tr>
+        <tr><td>Games with hidden information</td><td>Hidden state, provably fair</td><td>Battleship template, on-chain poker</td></tr>
+        <tr><td>AI agents with private state</td><td>Agents act on private data with provable behaviour</td><td>Midnight City simulation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2>Partner Chains toolkit</h2>
+    <p>IOG's Substrate-based toolkit lets a chain borrow Cardano security: stake pool operators register on Cardano and are selected into the partner chain's block-producer committee by stake. <strong>The standalone repo was archived on 2026-04-23</strong> ("Partner chains is now directly part of Midnight") and development continues inside <code>midnightntwrk/midnight-node</code>. Midnight is the only production user; Charli3 (oracle chain), Materios and Nuvola are early <Badge kind="unverified" />.</p>
+    <Callout kind="tip">
+      <p>For almost every builder the right move is to deploy <em>on</em> Midnight, not to launch a new partner chain.</p>
+    </Callout>
+
+    <h2>Funding and community</h2>
+    <ul>
+      <li><strong>Night Sky Accelerator</strong>: 10-week program, from July 2026.</li>
+      <li><strong>Hackathons</strong>: MLH Midnight hackathons, Hack Buenos Aires, an AKINDO buildathon in Japan.</li>
+      <li><strong>Learning</strong>: Midnight Academy (with HackQuest) and a weekly Developer Fireside (Wednesdays, 15:00 UTC).</li>
+    </ul>
+    <p>All funding routes, including Midnight's, are compared on <a href="/funding">Get funded</a>.</p>
+
+    <Sources items={sources} />
+    <NextPrev prev={{ href: "/frontiers/ai-agents", label: "AI agents" }} next={{ href: "/frontiers/governance", label: "Governance & treasury" }} />
+  </div>
+</Layout>
+
+<style>
+  tbody th { white-space: normal; text-transform: none; letter-spacing: 0; font-size: .85rem; width: 7rem; }
+  .compact-wrap { max-width: var(--prose); margin-bottom: 1.5rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; font-size: .82rem; color: var(--ink-2); margin-bottom: .7rem; }
+  .legend .btn { font-size: .82rem; padding: .3rem .7rem; }
+  .compact { font-size: .78rem; }
+  mark { background: none; color: inherit; border-radius: 3px; padding: 0 .15em; }
+  [data-hl="on"] mark.k-pub, .legend mark.k-pub { background: var(--accent-soft); color: var(--accent-ink); }
+  [data-hl="on"] mark.k-priv, .legend mark.k-priv { background: var(--live-bg); color: var(--live); }
+  [data-hl="on"] mark.k-disc, .legend mark.k-disc { background: var(--gap-bg); color: var(--gap); font-weight: 500; }
+  [data-hl="on"] mark.k-circ, .legend mark.k-circ { background: var(--coming-bg); color: var(--coming); }
+</style>
+
+<script>
+  const wrap = document.getElementById("compact-demo");
+  const btn = document.getElementById("hl-toggle");
+  if (wrap && btn) {
+    btn.addEventListener("click", () => {
+      const on = wrap.dataset.hl !== "on";
+      wrap.dataset.hl = on ? "on" : "off";
+      btn.setAttribute("aria-pressed", String(on));
+      btn.textContent = `Privacy highlighting: ${on ? "on" : "off"}`;
+    });
+  }
+</script>

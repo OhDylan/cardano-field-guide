@@ -1,0 +1,104 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Badge from "../components/Badge.astro";
+import Callout from "../components/Callout.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+
+const orgs = [
+  { name: "Input Output (IO / IOG)", does: "The original core engineering and research company: the Haskell node, Plutus, Leios, Hydra, Mithril, Midnight R&D. Six of its nine 2026 treasury proposals passed (≈ ₳131M plus ₳32.9M for research). It stopped the Acropolis Rust node and returned the funds in April 2026.", you: "Its ₳3.6M Developer Experience Initiative (a cardano-init CLI, a contracts library, a new developer hub) is due by the end of 2026. In September 2026 Charles Hoskinson said IO will no longer be \"Cardano-first-and-forever\"." },
+  { name: "Cardano Foundation (CF)", does: "Swiss non-profit. Runs cardano.org and the developer portal, now runs Project Catalyst, the Venture Hub / Cardano Accelerator Program, and the Cardano Ballot. A large DRep voter and a founding member of PRAGMA.", you: "Catalyst Pilot, the accelerator, the cardano-dev-skills AI plugin, and the x402 facilitator all come from here." },
+  { name: "EMURGO", does: "The commercial arm: ventures, EMURGO Academy, EMURGO Africa. It stepped down from the Pentad on 8 Jul 2026 after its SecondFi wallet (formerly Yoroi) lost ≈ 16M ADA from 374 wallets to a key-generation flaw. SecondFi/Yoroi is shutting down.", you: "Expect a reduced presence. Check that any EMURGO program you rely on is still active." },
+  { name: "Intersect (MBO)", does: "A member-based organisation that runs the committees (technical, open source, budget, product, civics), administers most treasury money, runs Hydra-based voting, and stewards GovTool. Received ₳25.4M for 2026.", you: "Membership is open; committee seats are paid; the Maintainer Retainer and the annual budget process run through Intersect." },
+  { name: "Midnight Foundation / Shielded Technologies", does: "Midnight, the privacy partner chain: Compact language, NIGHT token, mainnet genesis on 17 Mar 2026. Both were founded in May 2025; Shielded Technologies is an IOG spin-out.", you: "Night Sky Accelerator, MLH hackathons, and the Compact toolchain." },
+  { name: "The Pentad", does: "A coordination group of IO, CF, EMURGO (exited Jul 2026), Intersect and the Midnight Foundation. It delivered the Critical Integrations: USDCx, Pyth, Dune, LayerZero, Fireblocks.", you: "The integrations you can now build on: stablecoin, oracle, analytics, custody." },
+  { name: "PRAGMA", does: "Open-source member association (since Apr 2024): CF, Blink Labs, dcSpark, Sundae Labs, TxPipe. Home of the Aiken language and the Amaru Rust node.", you: "Contribute to Aiken or Amaru: the most visible open-source work in the ecosystem." },
+  { name: "TxPipe", does: "Rust infrastructure: Pallas, Dolos (data node), Oura (event streaming), UTxO RPC, Tx3 (transaction templates), Demeter (managed APIs). About ₳3.9M of treasury funding in 2026.", you: "The best entry point if you want to work on indexers and infrastructure in Rust." },
+  { name: "Blink Labs", does: "The Go stack: gOuroboros, Adder, and the Dingo node (₳6.9M in 2026). A member of the PRIME Operating Group.", you: "The on-ramp for Go developers." },
+  { name: "Sundae Labs", does: "SundaeSwap DEX and the treasury smart contracts used to hold withdrawn funds.", you: "Reusable, audited governance and treasury contracts." },
+  { name: "HLabs (Harmonic Laboratories)", does: "TypeScript core work: the pebble language (formerly plu-ts, ₳4.6M) and Gerolamo, a browser-based node (its 2026 request failed).", you: "For TypeScript developers who want to go deeper than SDKs." },
+  { name: "Tweag, VacuumLabs, Ensurable Systems, MLabs", does: "Core contractors: ledger, Plutus, node maintenance, Plutarch.", you: "Where much of the paid core-protocol engineering work happens." },
+  { name: "AlphaGrowth", does: "Operator of the ₳120M Cardano PRIME DeFi program.", you: "Runs the PRIME grants RFP. See Get funded." },
+];
+
+const sources = [
+  { label: "IOG — Developer Experience initiative", url: "https://www.iog.io/news/developer-experience-initiative" },
+  { label: "IOG — change of course (Acropolis, tiered pricing)", url: "https://www.iog.io/news/change-of-course-acropolis-tiered-pricing" },
+  { label: "CryptoSlate — Hoskinson: Cardano no longer comes first", url: "https://cryptoslate.com/charles-hoskinson-says-cardano-no-longer-comes-first-its-treasury-vote-explains-why/" },
+  { label: "The Block — EMURGO steps down from Pentad", url: "https://www.theblock.co/news/ecosystems/2026-07-08-cardano-founding-entity-emurgo-steps-down-pentad-governance-role-wallet-exploit-407593" },
+  { label: "Forklog — SecondFi to shut down", url: "https://forklog.com/en/secondfi-to-shut-down-after-2-6-million-ada-theft/" },
+  { label: "cardano.org — launch of PRAGMA", url: "https://cardano.org/news/2024-04-22-launch-of-pragma" },
+  { label: "cardano.org glossary — Amaru", url: "https://cardano.org/glossary/amaru/" },
+  { label: "CoinTurk — Amaru targets November 2026", url: "https://en.coin-turk.com/cardano-dijkstra-hard-fork-on-schedule-amaru-node-targets-november-2026/" },
+  { label: "Forum — Dingo treasury proposal 2026", url: "https://forum.cardano.org/t/dingo-treasury-proposal-2026-building-a-production-ready-cardano-block-producer-in-go/153500" },
+  { label: "IOG — Cardano node's evolution toward diversity", url: "https://www.iog.io/news/cardano-nodes-evolution-towards-diversity-and-modular-design" },
+  { label: "Dolos", url: "https://github.com/txpipe/dolos" },
+  { label: "Intersect — critical integrations progress / Pentad V2", url: "https://intersectmbo.org/news/critical-integrations-technical-progress-update-and-pentad-v2" },
+  { label: "Midnight — State of the Network, March 2026", url: "https://midnight.network/blog/state-of-the-network-march-2026" },
+  { label: "CIP-0001 — the CIP process", url: "https://cips.cardano.org/cip/CIP-0001" },
+  { label: "cardano.org — 2026 Intersect committee election results", url: "https://cardano.org/news/2026-05-08-intersect-committee-election-results-2026/" },
+];
+---
+<Layout title="Who's who" description="The organisations behind Cardano, what each one means for an independent builder, the node implementations, and where to ask for help.">
+  <PageHeader eyebrow="Who's who" title="Who does what in Cardano" lede="A lot of Cardano is still built by a few large organisations, which is part of why outside developers find it hard to see where they fit. Here's the map, and for each organisation, what it means for you." />
+
+  <div class="table-wrap">
+    <table class="orgs">
+      <thead><tr><th>Organisation</th><th>What it does</th><th>What it means for you</th></tr></thead>
+      <tbody>
+        {orgs.map((o) => <tr><td><strong>{o.name}</strong></td><td>{o.does}</td><td>{o.you}</td></tr>)}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p>2026 shook the founding entities: EMURGO left the Pentad after the SecondFi exploit, IO stopped one of its node projects and said it would no longer put Cardano first for every product, and DReps voted down several founding-entity proposals. For an independent builder this cuts both ways: less top-down direction, but also more room and more treasury money going to teams outside the big three.</p>
+    </Callout>
+
+    <h2 id="nodes">Node diversity: a strong signal for outside developers</h2>
+    <p>Until recently there was one node, written in Haskell by IO. Now independent teams are building full implementations in other languages, funded by the treasury. If outside teams can build the core protocol, they can certainly build apps.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Node</th><th>Language</th><th>Team</th><th>Status (Oct 2026)</th><th>Treasury funding</th></tr></thead>
+      <tbody>
+        <tr><td>cardano-node</td><td>Haskell</td><td>IO (+ Tweag, Ensurable maintenance)</td><td><Badge kind="live" label="Canonical" /> van Rossem enacted; Dijkstra work ongoing</td><td>Maintenance ₳62.1M (2026)</td></tr>
+        <tr><td><strong>Amaru</strong></td><td>Rust</td><td>PRAGMA</td><td><Badge kind="live" label="Mainnet relay" /> Bootstraps from Mithril; block production targeted for Nov 2026</td><td>₳1.5M (2025), ₳10.14M (2026)</td></tr>
+        <tr><td><strong>Dingo</strong></td><td>Go</td><td>Blink Labs</td><td><Badge kind="coming" label="Testnet" /> Block production, Plutus V1–V3, 48+ releases</td><td>₳6.9M (2026)</td></tr>
+        <tr><td>Gerolamo</td><td>TypeScript</td><td>HLabs</td><td><Badge kind="coming" label="Early" /> Runs in the browser</td><td>₳579K (2025); 2026 request failed</td></tr>
+        <tr><td>Acropolis</td><td>Rust (modular)</td><td>IO</td><td><Badge kind="closed" label="Discontinued" /> Stopped Apr 2026; code stays open source</td><td>₳1.4M returned</td></tr>
+        <tr><td>Dolos</td><td>Rust</td><td>TxPipe</td><td><Badge kind="live" label="Data node" /> Not a block producer; serves Blockfrost-compatible APIs</td><td>₳221K (2025), ₳541K (2026)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h2 id="community">Where to ask, and where to propose</h2>
+    <ul>
+      <li><a href="https://forum.cardano.org" rel="noopener">Cardano Forum</a>: proposals, governance debates, the weekly opportunities digest.</li>
+      <li><a href="https://cardano.stackexchange.com" rel="noopener">Cardano StackExchange</a>: technical Q&amp;A.</li>
+      <li>Discord: IOG Technical, Intersect, Aiken, TxPipe and Blink Labs servers are where developers actually talk.</li>
+      <li><a href="https://developers.cardano.org" rel="noopener">developers.cardano.org</a>: official portal, weekly office hours, the talent pool.</li>
+      <li><a href="https://devex.intersectmbo.org" rel="noopener">Intersect DevEx working group</a>: bi-weekly sessions on tooling and AI workflows.</li>
+    </ul>
+
+    <h3 id="cips">Proposing a standard (CIP)</h3>
+    <ol>
+      <li>If you're describing a problem rather than a solution, start with a <strong>CPS</strong> (Cardano Problem Statement).</li>
+      <li>Open a pull request to <a href="https://github.com/cardano-foundation/CIPs" rel="noopener">cardano-foundation/CIPs</a> with <code>?</code> as the number.</li>
+      <li>CIP editors triage it in bi-weekly public Discord meetings and assign a number once it's ready.</li>
+      <li>Statuses move Proposed → Active (or Inactive). Wallet APIs (CIP-30), metadata standards (CIP-25, CIP-68) and programmable tokens (CIP-113) all went through this process.</li>
+    </ol>
+    <p>An agent-wallet spending-policy standard is one CIP the ecosystem doesn't have yet. See <a href="/gaps#agent-wallet">Gaps</a>.</p>
+  </div>
+
+  <Sources items={sources} />
+  <NextPrev prev={{ href: "/gaps", label: "Gaps worth building" }} next={{ href: "/", label: "Back to start" }} />
+</Layout>
+
+<style>
+  .orgs td:first-child { min-width: 10rem; }
+  .orgs td { min-width: 14rem; }
+</style>

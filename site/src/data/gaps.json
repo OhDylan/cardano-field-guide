@@ -1,0 +1,162 @@
+[
+  {
+    "id": "vault-standard",
+    "group": "DeFi",
+    "title": "An eUTxO vault standard plus automated liquidity management",
+    "why": "Ethereum has ERC-4626; Cardano has no shared vault interface. LP positions on Minswap, Splash and SundaeSwap are managed by hand, and the PRIME audit lists automated liquidity management and vault standards among its named gaps.",
+    "who": "Liquidity providers, DAO treasuries, Liqwid/Indigo (yield-bearing receipt tokens as collateral)",
+    "funding": "Cardano PRIME RFP (lending & vault standards; liquidity tooling)",
+    "blocks": ["Minswap SDK", "Splash protocol-sdk", "SundaeSwap SDK", "Anastasia Labs aiken-design-patterns", "Mesh / Evolution SDK"],
+    "difficulty": "Hard — spec + audited contracts + keeper"
+  },
+  {
+    "id": "curated-lending",
+    "group": "DeFi",
+    "title": "Curated, isolated money markets on USDCx (Morpho-style)",
+    "why": "Lending is pooled (Liqwid) or small (Surf, FluidTokens P2P). There is no risk-curator model, and the PRIME audit asks for a second independent price feed alongside Pyth.",
+    "who": "USDCx holders looking for yield; risk curators; protocols needing credit lines",
+    "funding": "Cardano PRIME RFP (curated lending; second price feed)",
+    "blocks": ["Pyth Pro (Aiken lib pyth-lazer-cardano)", "Charli3 ODV pull oracle", "Orcfax feeds", "USDCx"],
+    "difficulty": "Hard — oracle and liquidation design, audit"
+  },
+  {
+    "id": "solver-network",
+    "group": "DeFi",
+    "title": "A shared batcher / solver network for orders and intents",
+    "why": "Every DEX runs its own batcher, which fragments liquidity and trust. The DeFi Kernel open standard exists, but its treasury request failed, so nobody runs a neutral solver market.",
+    "who": "DEXes that want to stop running batchers; solvers and market makers",
+    "funding": "Cardano PRIME RFP (common executor/scooper standard)",
+    "blocks": ["DeFi Kernel spec (defikernel.org)", "CIP-89 beacon tokens", "Splash off-chain agents", "Nested transactions (CIP-118, coming in Dijkstra)"],
+    "difficulty": "Medium–hard — off-chain infra plus economic design"
+  },
+  {
+    "id": "btc-credit",
+    "group": "DeFi",
+    "title": "BTC-ready credit and yield products",
+    "why": "No trust-minimised BTC bridge is in production yet. Bifrost is on testnet and Pogun targets mid-December 2026. Products built now against iBTC and fBTC interfaces would be ready when a bridge lands.",
+    "who": "BTC holders who want yield without selling; protocols bootstrapping BTC liquidity",
+    "funding": "Cardano PRIME; Orion Fund for venture-scale teams",
+    "blocks": ["Indigo iBTC (synthetic)", "FluidTokens Bifrost (fBTC, testnet)", "Pyth BTC feeds", "Bond-token patterns (Optim, Pogun design notes)"],
+    "difficulty": "Hard — say plainly which trust model you're using"
+  },
+  {
+    "id": "gateway-sdk",
+    "group": "DeFi",
+    "title": "A DeFi Gateway SDK with custody adapters",
+    "why": "Named in Appendix C of the PRIME proposal. Institutions and fintechs need one API that reaches Cardano DeFi through Fireblocks-style custody, and none exists.",
+    "who": "Exchanges, fintechs, custodians and market makers entering through Critical Integrations",
+    "funding": "Cardano PRIME RFP",
+    "blocks": ["DexHunter partner API", "Minswap / Sundae SDKs", "Fireblocks (Critical Integrations V2)", "Evolution SDK"],
+    "difficulty": "Medium"
+  },
+  {
+    "id": "prediction-markets",
+    "group": "DeFi",
+    "title": "Prediction markets",
+    "why": "The category is effectively empty on DefiLlama (Bodega ≈ $0). eUTxO order-book patterns fit naturally: every position can be its own UTxO.",
+    "who": "Retail users, communities, governance signalling",
+    "funding": "Catalyst (next round), Orion Fund",
+    "blocks": ["Order-book-as-UTxOs pattern", "Charli3 / Orcfax for resolution data", "USDCx / USDM"],
+    "difficulty": "Medium — the hard part is resolution and liquidity"
+  },
+  {
+    "id": "dual-stack-wallet",
+    "group": "UX & wallets",
+    "title": "Dual-stack wallets: MetaMask-controlled Cardano accounts",
+    "why": "There is no EVM compatibility (Milkomeda shut down in 2025). FluidTokens has shown that an Aiken contract can let a MetaMask or Bitcoin wallet control a Cardano address, but it's a prototype, not a product.",
+    "who": "EVM users arriving through USDCx and LayerZero; wallets that want new users",
+    "funding": "Cardano PRIME RFP (dual-stack wallets; EVM→Cardano bridge)",
+    "blocks": ["FluidTokens ft-cardano-btc-eth-accounts", "FluidTokens Aquarium (fee tanks)", "Babel fees (Dijkstra)", "SECP256k1 builtins"],
+    "difficulty": "Hard — security-critical"
+  },
+  {
+    "id": "fee-abstraction",
+    "group": "UX & wallets",
+    "title": "Gasless onboarding: apps that pay users' fees",
+    "why": "New users must get ADA before they can do anything, and every output needs min-ADA. Fee tanks exist (Aquarium), but there's no drop-in kit for app developers.",
+    "who": "Consumer apps, games, loyalty programs like Barça Fan Lab",
+    "funding": "Catalyst (next round); Cardano PRIME if it drives DeFi usage",
+    "blocks": ["FluidTokens Aquarium", "Nested transactions / Babel fees (CIP-118, coming)", "Mesh SDK"],
+    "difficulty": "Medium"
+  },
+  {
+    "id": "analytics-api",
+    "group": "Infra & data",
+    "title": "A token analytics API and dashboard to replace TapTools",
+    "why": "TapTools wound down in June 2026 after its leadership left, taking with it the API many wallets and bots used for prices, holders and charts.",
+    "who": "Wallets, trading bots, portfolio apps, researchers",
+    "funding": "Treasury or Intersect budget (public good); paid API",
+    "blocks": ["Dolos (Blockfrost-compatible)", "Oura event streams", "Kupo", "DefiLlama adapters", "Dune (live via Critical Integrations)"],
+    "difficulty": "Medium — mostly indexing and reliability"
+  },
+  {
+    "id": "attribution",
+    "group": "Infra & data",
+    "title": "Dune dashboards and on-chain attribution for DeFi incentives",
+    "why": "PRIME pays a performance fee only against verified TVL growth and wants action-based incentive campaigns with on-chain attribution. That needs neutral, reproducible dashboards.",
+    "who": "Cardano PRIME, protocols applying for incentives, DReps",
+    "funding": "Cardano PRIME",
+    "blocks": ["Dune Cardano tables", "Koios", "tx3.land protocol interfaces", "CIP-108 metadata"],
+    "difficulty": "Easy–medium — a great first project"
+  },
+  {
+    "id": "tx-dx",
+    "group": "Infra & data",
+    "title": "Transaction-building and debugging tools",
+    "why": "The 2025 Cardano developer survey names off-chain transaction building, script-failure debugging and fragmented tooling as top pain points. CBOR inspection, budget profiling and readable script errors are still rough.",
+    "who": "Every Cardano developer",
+    "funding": "Intersect Maintainer Retainer; Intersect budget process",
+    "blocks": ["Tx3", "Aiken traces (?)", "Ogmios evaluate", "Scalus / Blaze emulators", "Yaci DevKit"],
+    "difficulty": "Medium"
+  },
+  {
+    "id": "opportunity-feed",
+    "group": "Infra & data",
+    "title": "A structured opportunity feed (bounties, RFPs, jobs)",
+    "why": "Opportunities are scattered across forums, X and job boards. A volunteer compiles a weekly digest by hand, and three bounty boards are competing in early stages.",
+    "who": "Builders looking for work; programs looking for applicants",
+    "funding": "Catalyst; Intersect community budget",
+    "blocks": ["The JSON behind this site's opportunity board", "Koios governance data", "RSS / llms.txt"],
+    "difficulty": "Easy — the hard part is keeping it current"
+  },
+  {
+    "id": "agent-wallet",
+    "group": "AI agents",
+    "title": "Agent wallets with spending policies",
+    "why": "There's no CIP or product for an AI-agent wallet with daily limits, allowlists and human approval above a threshold. Today agents use hot wallets in the Masumi node or plain SDK wallets.",
+    "who": "Masumi agents, x402 clients, anyone letting an LLM spend money",
+    "funding": "Catalyst (next round); a strong CIP candidate",
+    "blocks": ["Native scripts (multisig + time-lock)", "Aiken validators", "@x402/cardano", "Masumi payment service", "Indigo cardano-mcp"],
+    "difficulty": "Medium"
+  },
+  {
+    "id": "x402-mainnet",
+    "group": "AI agents",
+    "title": "A production x402 facilitator and paid-API kit on mainnet",
+    "why": "The Cardano x402 scheme is in the spec and on npm, but the Cardano Foundation facilitator has only been proven on Preprod.",
+    "who": "API sellers, agent builders, data providers",
+    "funding": "Catalyst; Masumi ecosystem",
+    "blocks": ["@x402/cardano", "cardano-x402-facilitator (Java)", "Masumi escrow (assetTransferMethod: masumi)"],
+    "difficulty": "Medium"
+  },
+  {
+    "id": "nft-marketplace",
+    "group": "Consumer",
+    "title": "An NFT marketplace and creator tooling after JPG Store",
+    "why": "JPG Store, the main NFT marketplace, shut down on 23 May 2026. Collections and creators still exist, and CIP-68 metadata plus native assets make the contracts simpler than on most chains.",
+    "who": "Existing collections, creators, games, ticketing and loyalty programs",
+    "funding": "Orion Fund; Catalyst (next round)",
+    "blocks": ["Native assets + CIP-25/CIP-68", "Mesh contract library (marketplace)", "CIP-113 programmable tokens for royalties"],
+    "difficulty": "Medium — the hard part is liquidity and curation"
+  },
+  {
+    "id": "credentials",
+    "group": "Consumer",
+    "title": "Verifiable credentials and loyalty for brands",
+    "why": "Barça Fan Lab proves the demand. Most brands need a white-label kit: sign in, get a wallet, earn credentials. Midnight adds the option of proving facts without revealing data.",
+    "who": "Sports clubs, universities, employers, events",
+    "funding": "Catalyst (identity was a Pilot theme); CF Cardano Accelerator Program (real-world trust)",
+    "blocks": ["Andamio credentials", "CIP-68 reference NFTs", "Midnight Compact (selective disclosure)", "Mesh SDK"],
+    "difficulty": "Medium"
+  }
+]

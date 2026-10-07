@@ -32,9 +32,10 @@ validator hello_world {
 }`;
 
 const setupCode = `# 1. Toolchain (pick one installer)
-curl -sSfL https://install.aiken-lang.org | bash   # then: aikup
-# or: npm install -g @aiken-lang/aiken
-# or: brew install aiken-lang/tap/aiken
+curl --proto '=https' --tlsv1.2 -LsSf https://install.aiken-lang.org | sh   # installs aikup
+# or: npm install -g @aiken-lang/aikup
+# or: brew install aiken-lang/tap/aikup
+aikup   # installs the latest aiken
 
 # 2. New project, test, build
 aiken new me/hello && cd hello

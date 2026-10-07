@@ -1,0 +1,90 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Callout from "../components/Callout.astro";
+import Sources from "../components/Sources.astro";
+import NextPrev from "../components/NextPrev.astro";
+import gaps from "../data/gaps.json";
+
+const groups = ["DeFi", "UX & wallets", "Infra & data", "AI agents", "Consumer"];
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z]+/g, "-").replace(/(^-|-$)/g, "");
+
+const sources = [
+  { label: "DailyCoin — PRIME's named gaps and RFP scope", url: "https://dailycoin.com/cardanos-200m-defi-push-puts-evm-liquidity-in-focus/" },
+  { label: "AlphaGrowth — Cardano PRIME", url: "https://alphagrowth.io/cardano-prime" },
+  { label: "CoinTurk — PRIME audit (51.3/100)", url: "https://en.coin-turk.com/cardano-gains-7-5yuzde-audit-reveals-defi-weaknesses-as-ada-nears-0-25/" },
+  { label: "DeFi Kernel", url: "https://defikernel.org" },
+  { label: "FluidTokens — BTC/ETH-key Cardano accounts", url: "https://github.com/FluidTokens/ft-cardano-btc-eth-accounts" },
+  { label: "FluidTokens — Bifrost bridge", url: "https://github.com/FluidTokens/ft-bifrost-bridge" },
+  { label: "Cexplorer — paying fees with tokens (Aquarium)", url: "https://cexplorer.io/article/cardano-will-allow-paying-fees-with-tokens" },
+  { label: "The Block — TapTools winds down", url: "https://www.theblock.co/post/403457/taptools-winds-down" },
+  { label: "MEXC explainer — JPG Store closure and 'wave of failures'", url: "https://www.mexc.com/learn/article/is-cardano-ada-dead-its-founder-just-warned-of-a-wave-of-failures-/1" },
+  { label: "Forum — Milkomeda / EVM interoperability status", url: "https://forum.cardano.org/t/current-status-of-cardano-evm-interoperability-milkomeda-rosen/153432" },
+  { label: "Cardano Foundation — State of the Developer Ecosystem 2025", url: "https://cardano-foundation.github.io/state-of-the-developer-ecosystem/2025/" },
+  { label: "Forum — Cardano Weekly Opportunities #4", url: "https://forum.cardano.org/t/cardano-weekly-opportunities-4-september-20-2026/156901" },
+  { label: "Cardano Foundation x402 facilitator", url: "https://github.com/cardano-foundation/cardano-x402-facilitator" },
+  { label: "Crypto Briefing — x402 SDK on Cardano (mainnet not yet proven)", url: "https://cryptobriefing.com/cardano-x402-sdk-ada-api-payments/" },
+  { label: "DefiLlama — Cardano protocols", url: "https://defillama.com/chain/Cardano" },
+  { label: "FC Barcelona — Barça Fan Lab", url: "https://www.fcbarcelona.com/en/club/news/4581767/fc-barcelona-launches-bara-fan-lab-a-new-digital-experience-that-connects-club-values-with-new-web3-ways-of-participation-and-innovation" },
+];
+---
+<Layout title="Gaps worth building" description="An honest list of products Cardano is missing in late 2026 that a team of one to three could build, with evidence, users, funding and building blocks for each.">
+  <PageHeader eyebrow="Gaps" title="Gaps worth building" lede="A small ecosystem has a lot of missing pieces. That's the bad news, and it's also the opportunity: on a big chain these niches are taken, here several are open, some have money attached, and you'd be the default choice. Each gap below comes with the evidence, who would use it, what could fund it, and what you can build on." />
+
+  <div class="prose">
+    <Callout kind="honest">
+      <p>Several of these gaps exist because something <em>failed</em>: TapTools and JPG Store closed in 2026, DeltaDeFi paused, Milkomeda shut down. Users and liquidity are thin (DeFi TVL is about $73M), so a good product here won't get a big audience automatically.</p>
+      <p><strong>Our advice:</strong> pick gaps where someone is already paying (PRIME, Critical Integrations users, the treasury), build on the integrations that just arrived (USDCx, Pyth, Dune), and keep your costs small enough to survive a slow ramp.</p>
+    </Callout>
+  </div>
+
+  <nav class="jump" aria-label="Gap groups">
+    {groups.map((g) => <a href={`#${slug(g)}`}>{g} <span class="muted">({gaps.filter((x) => x.group === g).length})</span></a>)}
+  </nav>
+
+  {groups.map((g) => (
+    <section class="section" id={slug(g)}>
+      <h2>{g}</h2>
+      <div class="grid grid-2">
+        {gaps.filter((x) => x.group === g).map((gap) => (
+          <article class="gap card" id={gap.id}>
+            <h3>{gap.title}</h3>
+            <p class="why">{gap.why}</p>
+            <dl>
+              <dt>Who'd use it</dt><dd>{gap.who}</dd>
+              <dt>Could fund it</dt><dd>{gap.funding}</dd>
+              <dt>Difficulty</dt><dd>{gap.difficulty}</dd>
+            </dl>
+            <p class="blocks-label small muted">Build on</p>
+            <ul class="blocks">{gap.blocks.map((b) => <li>{b}</li>)}</ul>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <div class="prose section">
+    <Callout kind="tip" title="Know a gap we missed?">
+      <p>This list lives in one JSON file (<code>src/data/gaps.json</code>), so adding a gap is a pull request. A good entry includes evidence (a link), who would use it, and what it could be built on.</p>
+    </Callout>
+  </div>
+
+  <Sources items={sources} />
+  <NextPrev prev={{ href: "/funding", label: "Get funded" }} next={{ href: "/ecosystem", label: "Who's who" }} />
+</Layout>
+
+<style>
+  .jump { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1rem; }
+  .jump a { font-size: .86rem; padding: .35rem .75rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--ink-2); background: var(--surface); }
+  .jump a:hover { border-color: var(--accent); }
+  .section > h2 { margin-top: 0; }
+  .gap { display: flex; flex-direction: column; }
+  .gap h3 { font-size: 1.05rem; margin-bottom: .5rem; }
+  .why { font-size: .93rem; color: var(--ink-2); }
+  .gap dl { display: grid; grid-template-columns: 6.6rem 1fr; gap: .3rem .7rem; font-size: .88rem; margin: 0 0 .8rem; }
+  .gap dt { color: var(--muted); }
+  .gap dd { margin: 0; }
+  .blocks-label { margin: 0 0 .3rem; }
+  .blocks { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .35rem; }
+  .blocks li { font-family: var(--font-mono); font-size: .74rem; background: var(--surface-2); border-radius: 4px; padding: .15rem .45rem; margin: 0; overflow-wrap: anywhere; }
+</style>

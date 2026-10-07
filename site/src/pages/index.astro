@@ -128,9 +128,11 @@ const frontiers = [
   let ok = 0;
   const done = () => { if (stamp) stamp.textContent = ok ? `Live: ${ok} of 4 values fetched just now from Koios and DefiLlama. The rest are from the 2026-10-07 snapshot.` : "Live data unavailable. Showing the 2026-10-07 snapshot."; };
   const get = (u: string) => fetch(u, { headers: { accept: "application/json" } }).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); });
+  // Epochs are exactly 5 days; Shelley epoch 208 started 2020-07-29 21:44:51 UTC.
+  const epoch = 208 + Math.floor((Date.now() / 1000 - 1596059091) / 432000);
+  set("epoch", String(epoch)); ok++;
   Promise.allSettled([
-    get("https://api.koios.rest/api/v1/tip").then((d) => { set("epoch", String(d[0].epoch_no)); ok++; return d[0].epoch_no; })
-      .then((ep) => get(`https://api.koios.rest/api/v1/totals?_epoch_no=${ep}`))
+    get(`https://api.koios.rest/api/v1/totals?_epoch_no=${epoch}`)
       .then((t) => { set("treasury", `${(Number(t[0].treasury) / 1e15).toFixed(3)}B ADA`); ok++; }),
     get("https://api.llama.fi/v2/chains").then((cs) => { const c = cs.find((x: { name: string }) => x.name === "Cardano"); if (c) { set("tvl", `$${Math.round(c.tvl / 1e6)}M`); ok++; } }),
     get("https://coins.llama.fi/prices/current/coingecko:cardano").then((p) => { set("price", `$${p.coins["coingecko:cardano"].price.toFixed(3)}`); ok++; }),
